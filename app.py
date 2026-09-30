@@ -1,38 +1,14 @@
 import streamlit as st
 import sqlite3
 import hashlib
-from datetime import datetime, date
-
-# =========================================================
-# CONFIGURAÇÃO
-# =========================================================
 
 st.set_page_config(
     page_title="BioCore",
-    page_icon="🟢",
-    layout="centered"
+    page_icon="🟢"
 )
 
 DB = "biocore.db"
 
-MERCADO_LIVRE = "https://www.mercadolivre.com.br/social/sama6231844"
-CORESTRYKE = "https://corestryke.com"
-TRUST_WALLET = "https://trustwallet.com/"
-
-BATTLE_WITHIN = (
-    "https://drive.google.com/uc?export=download"
-    "&id=1VoOv0AacWqtweJBlmXd6awJe-bOdmfRX"
-)
-
-BIO_TREINO = 10
-BIO_FOTO = 70
-MINIMO_SAQUE = 5000
-MINIMO_COMPRAS = 2
-
-
-# =========================================================
-# BANCO DE DADOS
-# =========================================================
 
 def conectar():
     return sqlite3.connect(DB)
@@ -42,87 +18,19 @@ def criar_banco():
     conn = conectar()
     c = conn.cursor()
 
-    # Participantes
     c.execute("""
         CREATE TABLE IF NOT EXISTS participantes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nome TEXT NOT NULL,
             email TEXT UNIQUE NOT NULL,
             senha TEXT NOT NULL,
-            bio INTEGER DEFAULT 0,
-            compras_qualificadas INTEGER DEFAULT 0
-        )
-    """)
-
-    # Treinos
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS treinos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            participante_id INTEGER NOT NULL,
-            atividade TEXT NOT NULL,
-            data TEXT NOT NULL,
-            bio INTEGER DEFAULT 10
-        )
-    """)
-
-    # Fotos
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS fotos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            participante_id INTEGER NOT NULL,
-            semana TEXT NOT NULL,
-            arquivo TEXT NOT NULL,
-            bio INTEGER DEFAULT 70
-        )
-    """)
-
-    # Fases do jogo
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS fases (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            participante_id INTEGER NOT NULL,
-            fase INTEGER NOT NULL,
-            bio INTEGER NOT NULL,
-            UNIQUE(participante_id, fase)
-        )
-    """)
-
-    # Compras
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS compras (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            participante_id INTEGER NOT NULL,
-            descricao TEXT NOT NULL,
-            valor REAL NOT NULL,
-            comissao REAL DEFAULT 0,
-            bio INTEGER DEFAULT 0,
-            validada INTEGER DEFAULT 0,
-            data TEXT NOT NULL
-        )
-    """)
-
-    # Saques
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS saques (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            participante_id INTEGER NOT NULL,
-            bio INTEGER NOT NULL,
-            valor REAL NOT NULL,
-            data TEXT NOT NULL,
-            status TEXT DEFAULT 'Pendente'
+            bio INTEGER DEFAULT 0
         )
     """)
 
     conn.commit()
     conn.close()
 
-
-criar_banco()
-
-
-# =========================================================
-# FUNÇÕES
-# =========================================================
 
 def hash_senha(senha):
     return hashlib.sha256(senha.encode()).hexdigest()
@@ -133,21 +41,24 @@ def criar_conta(nome, email, senha):
     c = conn.cursor()
 
     try:
-        c.execute("""
+        c.execute(
+            """
             INSERT INTO participantes
-            (nome, email, senha, bio, compras_qualificadas)
-            VALUES (?, ?, ?, 0, 0)
-        """, (
-            nome.strip(),
-            email.strip().lower(),
-            hash_senha(senha)
-        ))
+            (nome, email, senha, bio)
+            VALUES (?, ?, ?, 0)
+            """,
+            (
+                nome,
+                email.lower(),
+                hash_senha(senha)
+            )
+        )
 
         conn.commit()
         return True, "Conta criada com sucesso!"
 
     except sqlite3.IntegrityError:
-        return False, "Este e-mail já está cadastrado."
+        return False, "Esse e-mail já está cadastrado."
 
     finally:
         conn.close()
@@ -157,49 +68,188 @@ def fazer_login(email, senha):
     conn = conectar()
     c = conn.cursor()
 
-    c.execute("""
-        SELECT id, nome
+    c.execute(
+        """
+        SELECT id, nome, bio
         FROM participantes
         WHERE email = ? AND senha = ?
-    """, (
-        email.strip().lower(),
-        hash_senha(senha)
-    ))
+        """,
+        (
+            email.lower(),
+            hash_senha(senha)
+        )
+    )
 
     resultado = c.fetchone()
+
     conn.close()
 
     return resultado
 
 
-def obter_participante(participante_id):
-    conn = conectar()
-    c = conn.cursor()
-
-    c.execute("""
-        SELECT id, nome, email, bio, compras_qualificadas
-        FROM participantes
-        WHERE id = ?
-    """, (participante_id,))
-
-    resultado = c.fetchone()
-    conn.close()
-
-    return resultado
+criar_banco()
 
 
-def adicionar_bio(participante_id, quantidade):
-    conn = conectar()
-    c = conn.cursor()
+if "logado" not in st.session_state:
+    st.session_state.logado = False
 
-    c.execute("""
-        UPDATE participantes
-        SET bio = bio + ?
-        WHERE id = ?
-    """, (quantidade, participante_id))
-
-    conn.commit()
-    conn.close()
+if "usuario_id" not in st.session_state:
+    st.session_state.usuario_id = None
 
 
-def
+if not st.session_state.logado:
+
+    st.title("🟢 BioCore")
+
+    st.subheader("Treino • Atividade Física • Recompensas")
+
+    login, cadastro = st.tabs([
+        "Entrar",
+        "Criar conta"
+    ])
+
+    with login:
+
+        st.markdown("### 🔐 Entrar")
+
+        email = st.text_input(
+            "E-mail"
+        )
+
+        senha = st.text_input(
+            "Senha",
+            type="password"
+        )
+
+        if st.button(
+            "Entrar",
+            use_container_width=True
+        ):
+
+            usuario = fazer_login(
+                email,
+                senha
+            )
+
+            if usuario:
+
+                st.session_state.logado = True
+                st.session_state.usuario_id = usuario[0]
+
+                st.rerun()
+
+            else:
+
+                st.error(
+                    "E-mail ou senha incorretos."
+                )
+
+
+    with cadastro:
+
+        st.markdown("### 👤 Criar conta")
+
+        nome = st.text_input(
+            "Nome"
+        )
+
+        email_cadastro = st.text_input(
+            "E-mail"
+        )
+
+        senha_cadastro = st.text_input(
+            "Senha",
+            type="password"
+        )
+
+        confirmar = st.text_input(
+            "Confirmar senha",
+            type="password"
+        )
+
+        if st.button(
+            "Criar minha conta",
+            use_container_width=True
+        ):
+
+            if not nome or not email_cadastro or not senha_cadastro:
+
+                st.error(
+                    "Preencha todos os campos."
+                )
+
+            elif senha_cadastro != confirmar:
+
+                st.error(
+                    "As senhas não são iguais."
+                )
+
+            elif len(senha_cadastro) < 6:
+
+                st.error(
+                    "A senha precisa ter pelo menos 6 caracteres."
+                )
+
+            else:
+
+                sucesso, mensagem = criar_conta(
+                    nome,
+                    email_cadastro,
+                    senha_cadastro
+                )
+
+                if sucesso:
+
+                    st.success(mensagem)
+
+                else:
+
+                    st.error(mensagem)
+
+    st.stop()
+
+
+usuario_id = st.session_state.usuario_id
+
+conn = conectar()
+c = conn.cursor()
+
+c.execute(
+    """
+    SELECT nome, email, bio
+    FROM participantes
+    WHERE id = ?
+    """,
+    (usuario_id,)
+)
+
+usuario = c.fetchone()
+
+conn.close()
+
+
+st.title("🟢 BioCore")
+
+st.write(
+    f"Olá, **{usuario[0]}**!"
+)
+
+st.metric(
+    "Seu saldo BIO",
+    usuario[2]
+)
+
+st.metric(
+    "Valor",
+    f"R$ {usuario[2] / 100:.2f}"
+)
+
+if st.button(
+    "Sair",
+    use_container_width=True
+):
+
+    st.session_state.logado = False
+    st.session_state.usuario_id = None
+
+    st.rerun()
