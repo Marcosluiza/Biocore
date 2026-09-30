@@ -35,8 +35,8 @@ MINIMO_COMPRAS = 2
 # TROQUE ESTES DOIS DADOS
 # ============================================================
 
-ADMIN_EMAIL = "admin@biocore.com"
-ADMIN_SENHA = "Troque_Esta_Senha_123"
+ADMIN_EMAIL = "tubaroesazuis7@gmail.com"
+ADMIN_SENHA = "caboverde@1986"
 
 
 # ============================================================
