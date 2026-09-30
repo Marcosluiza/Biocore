@@ -1,12 +1,9 @@
+
 import streamlit as st
 import sqlite3
 import hashlib
 import os
 from datetime import date, datetime
-
-# ============================================================
-# CONFIGURAÇÃO
-# ============================================================
 
 st.set_page_config(
     page_title="BioCore",
@@ -16,32 +13,18 @@ st.set_page_config(
 
 DB = "biocore_novo.db"
 
-# Links
 MERCADO_LIVRE = "https://www.mercadolivre.com.br/social/sama6231844"
 CORESTRYKE = "https://corestryke.com"
 TRUST_WALLET = "https://trustwallet.com/"
-BATTLE_WITHIN = "https://drive.google.com/uc?export=download&id=1VoOv0AacWqtweJBlmXd6awJe-bOdmfRX"
 
-# Recompensas
 BIO_TREINO = 10
 BIO_FOTO = 70
 
-# Cashback
 MINIMO_SAQUE = 5000
 MINIMO_COMPRAS = 2
 
-# ============================================================
-# ADMINISTRADOR
-# TROQUE ESTES DOIS DADOS
-# ============================================================
-
-ADMIN_EMAIL = "tubaroesazuis7@gmail.com"
-ADMIN_SENHA = "caboverde@1986"
-
-
-# ============================================================
-# ESTILO
-# ============================================================
+ADMIN_EMAIL = "admin@biocore.com"
+ADMIN_SENHA = "Troque_Esta_Senha_123"
 
 st.markdown("""
 <style>
@@ -85,10 +68,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# ============================================================
-# BANCO DE DADOS
-# ============================================================
-
 def conectar():
     return sqlite3.connect(DB)
 
@@ -127,21 +106,12 @@ def criar_banco():
     """)
 
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS fases (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            participante_id INTEGER NOT NULL,
-            fase INTEGER NOT NULL,
-            bio INTEGER NOT NULL,
-            UNIQUE(participante_id, fase)
-        )
-    """)
-
-    cursor.execute("""
         CREATE TABLE IF NOT EXISTS compras (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             participante_id INTEGER NOT NULL,
             descricao TEXT NOT NULL,
             valor REAL NOT NULL,
+            comprovante TEXT,
             validada INTEGER DEFAULT 0,
             bio INTEGER DEFAULT 0,
             data TEXT NOT NULL
@@ -159,6 +129,17 @@ def criar_banco():
         )
     """)
 
+    # Caso o banco antigo já tenha a tabela compras,
+    # adiciona a coluna comprovante automaticamente.
+    cursor.execute("PRAGMA table_info(compras)")
+    colunas = [coluna[1] for coluna in cursor.fetchall()]
+
+    if "comprovante" not in colunas:
+        cursor.execute("""
+            ALTER TABLE compras
+            ADD COLUMN comprovante TEXT
+        """)
+
     conn.commit()
     conn.close()
 
@@ -166,17 +147,9 @@ def criar_banco():
 criar_banco()
 
 
-# ============================================================
-# SENHA
-# ============================================================
-
 def hash_senha(senha):
     return hashlib.sha256(senha.encode()).hexdigest()
 
-
-# ============================================================
-# PARTICIPANTES
-# ============================================================
 
 def criar_conta(nome, email, senha):
 
@@ -184,6 +157,7 @@ def criar_conta(nome, email, senha):
     cursor = conn.cursor()
 
     try:
+
         cursor.execute("""
             INSERT INTO participantes
             (nome, email, senha, bio)
@@ -198,9 +172,11 @@ def criar_conta(nome, email, senha):
         return True
 
     except sqlite3.IntegrityError:
+
         return False
 
     finally:
+
         conn.close()
 
 
@@ -219,6 +195,7 @@ def fazer_login(email, senha):
     ))
 
     usuario = cursor.fetchone()
+
     conn.close()
 
     return usuario
@@ -236,14 +213,11 @@ def obter_usuario(usuario_id):
     """, (usuario_id,))
 
     usuario = cursor.fetchone()
+
     conn.close()
 
     return usuario
 
-
-# ============================================================
-# TREINOS
-# ============================================================
 
 def registrar_treino(usuario_id, atividade):
 
@@ -257,12 +231,17 @@ def registrar_treino(usuario_id, atividade):
         FROM treinos
         WHERE participante_id = ?
         AND data = ?
-    """, (usuario_id, hoje))
+    """, (
+        usuario_id,
+        hoje
+    ))
 
     ja_registrou = cursor.fetchone()[0]
 
     if ja_registrou > 0:
+
         conn.close()
+
         return False, "Você já registrou um treino hoje."
 
     cursor.execute("""
@@ -290,12 +269,10 @@ def registrar_treino(usuario_id, atividade):
     return True, f"+{BIO_TREINO} Biocoins pelo treino!"
 
 
-# ============================================================
-# FOTO SEMANAL
-# ============================================================
-
 def semana_atual():
+
     hoje = date.today()
+
     return f"{hoje.isocalendar().year}-W{hoje.isocalendar().week}"
 
 
@@ -319,7 +296,9 @@ def registrar_foto(usuario_id, arquivo):
     ja_enviou = cursor.fetchone()[0]
 
     if ja_enviou > 0:
+
         conn.close()
+
         return False, "Você já enviou a foto desta semana."
 
     os.makedirs("uploads", exist_ok=True)
@@ -334,6 +313,7 @@ def registrar_foto(usuario_id, arquivo):
     )
 
     with open(caminho, "wb") as f:
+
         f.write(arquivo.getbuffer())
 
     cursor.execute("""
@@ -361,96 +341,61 @@ def registrar_foto(usuario_id, arquivo):
     return True, f"+{BIO_FOTO} Biocoins pela foto semanal!"
 
 
-# ============================================================
-# BATTLE WITHIN
-# ============================================================
+def registrar_compra(
+    usuario_id,
+    descricao,
+    valor,
+    comprovante
+):
 
-def recompensa_fase(fase):
+    os.makedirs("uploads", exist_ok=True)
 
-    if 1 <= fase <= 10:
-        return 10
+    caminho_comprovante = None
 
-    if 11 <= fase <= 20:
-        return 20
+    if comprovante:
 
-    if 21 <= fase <= 30:
-        return 30
+        nome_seguro = os.path.basename(
+            comprovante.name
+        )
 
-    if 31 <= fase <= 40:
-        return 40
+        nome_final = (
+            f"compra_{usuario_id}_"
+            f"{datetime.now().strftime('%Y%m%d%H%M%S')}_"
+            f"{nome_seguro}"
+        )
 
-    return 0
+        caminho_comprovante = os.path.join(
+            "uploads",
+            nome_final
+        )
 
+        with open(caminho_comprovante, "wb") as f:
 
-def registrar_fase(usuario_id, fase):
-
-    if fase < 1 or fase > 40:
-        return False, "A fase deve estar entre 1 e 40."
-
-    recompensa = recompensa_fase(fase)
-
-    conn = conectar()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        SELECT COUNT(*)
-        FROM fases
-        WHERE participante_id = ?
-        AND fase = ?
-    """, (
-        usuario_id,
-        fase
-    ))
-
-    ja_feita = cursor.fetchone()[0]
-
-    if ja_feita > 0:
-        conn.close()
-        return False, "Essa fase já foi registrada."
-
-    cursor.execute("""
-        INSERT INTO fases
-        (participante_id, fase, bio)
-        VALUES (?, ?, ?)
-    """, (
-        usuario_id,
-        fase,
-        recompensa
-    ))
-
-    cursor.execute("""
-        UPDATE participantes
-        SET bio = bio + ?
-        WHERE id = ?
-    """, (
-        recompensa,
-        usuario_id
-    ))
-
-    conn.commit()
-    conn.close()
-
-    return True, f"+{recompensa} Biocoins pela fase {fase}!"
-
-
-# ============================================================
-# COMPRAS MERCADO LIVRE
-# ============================================================
-
-def registrar_compra(usuario_id, descricao, valor):
+            f.write(comprovante.getbuffer())
 
     conn = conectar()
     cursor = conn.cursor()
 
     cursor.execute("""
         INSERT INTO compras
-        (participante_id, descricao, valor, validada, bio, data)
-        VALUES (?, ?, ?, 0, 0, ?)
+        (
+            participante_id,
+            descricao,
+            valor,
+            comprovante,
+            validada,
+            bio,
+            data
+        )
+        VALUES (?, ?, ?, ?, 0, 0, ?)
     """, (
         usuario_id,
         descricao,
         valor,
-        datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        caminho_comprovante,
+        datetime.now().strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
     ))
 
     conn.commit()
@@ -476,26 +421,30 @@ def contar_compras_validadas(usuario_id):
     return total
 
 
-# ============================================================
-# SAQUE / CASHBACK
-# ============================================================
-
 def solicitar_saque(usuario_id):
 
     usuario = obter_usuario(usuario_id)
 
     if not usuario:
+
         return False, "Usuário não encontrado."
 
     saldo = usuario[3]
 
-    compras = contar_compras_validadas(usuario_id)
+    compras = contar_compras_validadas(
+        usuario_id
+    )
 
     if saldo < MINIMO_SAQUE:
+
         return False, "Você ainda não possui 5.000 Biocoins."
 
     if compras < MINIMO_COMPRAS:
-        return False, "Você precisa ter pelo menos 2 compras validadas."
+
+        return False, (
+            "Você precisa ter pelo menos "
+            "2 compras validadas."
+        )
 
     conn = conectar()
     cursor = conn.cursor()
@@ -510,8 +459,13 @@ def solicitar_saque(usuario_id):
     pendentes = cursor.fetchone()[0]
 
     if pendentes > 0:
+
         conn.close()
-        return False, "Você já possui um cashback aguardando análise."
+
+        return False, (
+            "Você já possui um cashback "
+            "aguardando análise."
+        )
 
     cursor.execute("""
         INSERT INTO saques
@@ -521,7 +475,9 @@ def solicitar_saque(usuario_id):
         usuario_id,
         MINIMO_SAQUE,
         50,
-        datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        datetime.now().strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
     ))
 
     conn.commit()
@@ -530,18 +486,15 @@ def solicitar_saque(usuario_id):
     return True, "Solicitação de cashback enviada."
 
 
-# ============================================================
-# ADMIN
-# ============================================================
-
 def validar_compra(compra_id, comissao):
 
     if comissao < 0:
+
         return False, "Comissão inválida."
 
-    # Participante recebe 25% da comissão.
-    # 100 Biocoins = R$1.
-    recompensa = int(round(comissao * 0.25 * 100))
+    recompensa = int(
+        round(comissao * 0.25 * 100)
+    )
 
     conn = conectar()
     cursor = conn.cursor()
@@ -555,14 +508,18 @@ def validar_compra(compra_id, comissao):
     compra = cursor.fetchone()
 
     if not compra:
+
         conn.close()
+
         return False, "Compra não encontrada."
 
     participante_id = compra[0]
     validada = compra[1]
 
     if validada == 1:
+
         conn.close()
+
         return False, "Essa compra já foi validada."
 
     cursor.execute("""
@@ -587,10 +544,16 @@ def validar_compra(compra_id, comissao):
     conn.commit()
     conn.close()
 
-    return True, f"Compra validada. +{recompensa} Biocoins."
+    return True, (
+        f"Compra validada. "
+        f"+{recompensa} Biocoins."
+    )
 
 
-def ajustar_biocoins(participante_id, quantidade):
+def ajustar_biocoins(
+    participante_id,
+    quantidade
+):
 
     conn = conectar()
     cursor = conn.cursor()
@@ -604,13 +567,17 @@ def ajustar_biocoins(participante_id, quantidade):
     resultado = cursor.fetchone()
 
     if not resultado:
+
         conn.close()
+
         return False
 
     saldo_atual = resultado[0]
+
     novo_saldo = saldo_atual + quantidade
 
     if novo_saldo < 0:
+
         novo_saldo = 0
 
     cursor.execute("""
@@ -642,7 +609,9 @@ def aprovar_saque(saque_id):
     saque = cursor.fetchone()
 
     if not saque:
+
         conn.close()
+
         return False, "Saque não encontrado."
 
     participante_id = saque[0]
@@ -650,8 +619,12 @@ def aprovar_saque(saque_id):
     status = saque[2]
 
     if status != "Pendente":
+
         conn.close()
-        return False, "Esse saque já foi analisado."
+
+        return False, (
+            "Esse saque já foi analisado."
+        )
 
     cursor.execute("""
         SELECT bio
@@ -662,12 +635,17 @@ def aprovar_saque(saque_id):
     participante = cursor.fetchone()
 
     if not participante:
+
         conn.close()
-        return False, "Participante não encontrado."
+
+        return False, (
+            "Participante não encontrado."
+        )
 
     saldo = participante[0]
 
     if saldo < quantidade:
+
         cursor.execute("""
             UPDATE saques
             SET status = 'Rejeitado'
@@ -677,7 +655,10 @@ def aprovar_saque(saque_id):
         conn.commit()
         conn.close()
 
-        return False, "Saldo insuficiente. Saque rejeitado."
+        return False, (
+            "Saldo insuficiente. "
+            "Saque rejeitado."
+        )
 
     cursor.execute("""
         UPDATE participantes
@@ -721,32 +702,24 @@ def rejeitar_saque(saque_id):
     return alterou
 
 
-# ============================================================
-# SESSÃO
-# ============================================================
-
 if "usuario_id" not in st.session_state:
+
     st.session_state.usuario_id = None
 
+
 if "admin_logado" not in st.session_state:
+
     st.session_state.admin_logado = False
 
-
-# ============================================================
-# LOGOUT
-# ============================================================
 
 def logout():
 
     st.session_state.usuario_id = None
+
     st.session_state.admin_logado = False
 
     st.rerun()
 
-
-# ============================================================
-# ÁREA DO ADMINISTRADOR
-# ============================================================
 
 def pagina_admin():
 
@@ -757,30 +730,38 @@ def pagina_admin():
 
     st.subheader("Painel do Administrador")
 
-    if st.button("🚪 Sair do administrador", key="admin_logout"):
+    if st.button(
+        "🚪 Sair do administrador",
+        key="admin_logout"
+    ):
+
         logout()
 
     conn = conectar()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT COUNT(*) FROM participantes")
+    cursor.execute(
+        "SELECT COUNT(*) FROM participantes"
+    )
+
     total_participantes = cursor.fetchone()[0]
 
-    cursor.execute("SELECT COALESCE(SUM(bio), 0) FROM participantes")
+    cursor.execute(
+        "SELECT COALESCE(SUM(bio), 0) FROM participantes"
+    )
+
     total_biocoins = cursor.fetchone()[0]
 
-    cursor.execute("""
-        SELECT COUNT(*)
-        FROM compras
-        WHERE validada = 0
-    """)
+    cursor.execute(
+        "SELECT COUNT(*) FROM compras WHERE validada = 0"
+    )
+
     compras_pendentes = cursor.fetchone()[0]
 
-    cursor.execute("""
-        SELECT COUNT(*)
-        FROM saques
-        WHERE status = 'Pendente'
-    """)
+    cursor.execute(
+        "SELECT COUNT(*) FROM saques WHERE status = 'Pendente'"
+    )
+
     saques_pendentes = cursor.fetchone()[0]
 
     conn.close()
@@ -788,18 +769,34 @@ def pagina_admin():
     col1, col2 = st.columns(2)
 
     with col1:
-        st.metric("Participantes", total_participantes)
+
+        st.metric(
+            "Participantes",
+            total_participantes
+        )
 
     with col2:
-        st.metric("Biocoins", total_biocoins)
+
+        st.metric(
+            "Biocoins",
+            total_biocoins
+        )
 
     col3, col4 = st.columns(2)
 
     with col3:
-        st.metric("Compras pendentes", compras_pendentes)
+
+        st.metric(
+            "Compras pendentes",
+            compras_pendentes
+        )
 
     with col4:
-        st.metric("Cashbacks pendentes", saques_pendentes)
+
+        st.metric(
+            "Cashbacks pendentes",
+            saques_pendentes
+        )
 
     abas = st.tabs([
         "👥 Participantes",
@@ -807,10 +804,6 @@ def pagina_admin():
         "💰 Cashbacks",
         "🏋️ Atividades"
     ])
-
-    # --------------------------------------------------------
-    # PARTICIPANTES
-    # --------------------------------------------------------
 
     with abas[0]:
 
@@ -827,7 +820,10 @@ def pagina_admin():
         conn.close()
 
         if not participantes:
-            st.info("Nenhum participante cadastrado.")
+
+            st.info(
+                "Nenhum participante cadastrado."
+            )
 
         else:
 
@@ -842,8 +838,13 @@ def pagina_admin():
                     f"👤 {nome} — {saldo} Biocoins"
                 ):
 
-                    st.write(f"**E-mail:** {email}")
-                    st.write(f"**ID:** {pid}")
+                    st.write(
+                        f"**E-mail:** {email}"
+                    )
+
+                    st.write(
+                        f"**ID:** {pid}"
+                    )
 
                     st.markdown(
                         f"""
@@ -884,13 +885,11 @@ def pagina_admin():
 
                         st.rerun()
 
-    # --------------------------------------------------------
-    # COMPRAS
-    # --------------------------------------------------------
-
     with abas[1]:
 
-        st.subheader("Compras do Mercado Livre")
+        st.subheader(
+            "🛒 Compras do Mercado Livre"
+        )
 
         conn = conectar()
 
@@ -901,19 +900,24 @@ def pagina_admin():
                 participantes.email,
                 compras.descricao,
                 compras.valor,
+                compras.comprovante,
                 compras.validada,
                 compras.bio,
                 compras.data
             FROM compras
             JOIN participantes
-            ON participantes.id = compras.participante_id
+            ON participantes.id =
+                compras.participante_id
             ORDER BY compras.id DESC
         """).fetchall()
 
         conn.close()
 
         if not compras:
-            st.info("Nenhuma compra registrada.")
+
+            st.info(
+                "Nenhuma compra registrada."
+            )
 
         for compra in compras:
 
@@ -922,23 +926,67 @@ def pagina_admin():
             email = compra[2]
             descricao = compra[3]
             valor = compra[4]
-            validada = compra[5]
-            recompensa = compra[6]
-            data_compra = compra[7]
+            comprovante = compra[5]
+            validada = compra[6]
+            recompensa = compra[7]
+            data_compra = compra[8]
 
             with st.expander(
                 f"🛒 {nome} — R$ {valor:.2f}"
             ):
 
-                st.write(f"**E-mail:** {email}")
-                st.write(f"**Produto:** {descricao}")
-                st.write(f"**Valor:** R$ {valor:.2f}")
-                st.write(f"**Data:** {data_compra}")
+                st.write(
+                    f"**Participante:** {nome}"
+                )
+
+                st.write(
+                    f"**E-mail:** {email}"
+                )
+
+                st.write(
+                    f"**Produto:** {descricao}"
+                )
+
+                st.write(
+                    f"**Valor:** R$ {valor:.2f}"
+                )
+
+                st.write(
+                    f"**Data:** {data_compra}"
+                )
+
+                if comprovante:
+
+                    if os.path.exists(comprovante):
+
+                        st.write(
+                            "**Comprovante:**"
+                        )
+
+                        try:
+
+                            st.image(
+                                comprovante,
+                                width=400
+                            )
+
+                        except Exception:
+
+                            st.write(
+                                "Comprovante enviado."
+                            )
+
+                else:
+
+                    st.warning(
+                        "Nenhum comprovante foi enviado."
+                    )
 
                 if validada:
 
                     st.success(
-                        f"Validada — {recompensa} Biocoins"
+                        f"Validada — "
+                        f"{recompensa} Biocoins"
                     )
 
                 else:
@@ -960,25 +1008,32 @@ def pagina_admin():
                         key=f"validar_compra_{compra_id}"
                     ):
 
-                        sucesso, mensagem = validar_compra(
-                            compra_id,
-                            comissao
+                        sucesso, mensagem = (
+                            validar_compra(
+                                compra_id,
+                                comissao
+                            )
                         )
 
                         if sucesso:
-                            st.success(mensagem)
+
+                            st.success(
+                                mensagem
+                            )
+
                         else:
-                            st.error(mensagem)
+
+                            st.error(
+                                mensagem
+                            )
 
                         st.rerun()
 
-    # --------------------------------------------------------
-    # CASHBACK
-    # --------------------------------------------------------
-
     with abas[2]:
 
-        st.subheader("Solicitações de Cashback")
+        st.subheader(
+            "Solicitações de Cashback"
+        )
 
         conn = conectar()
 
@@ -993,14 +1048,18 @@ def pagina_admin():
                 saques.status
             FROM saques
             JOIN participantes
-            ON participantes.id = saques.participante_id
+            ON participantes.id =
+                saques.participante_id
             ORDER BY saques.id DESC
         """).fetchall()
 
         conn.close()
 
         if not saques:
-            st.info("Nenhuma solicitação.")
+
+            st.info(
+                "Nenhuma solicitação."
+            )
 
         for saque in saques:
 
@@ -1013,14 +1072,29 @@ def pagina_admin():
             status = saque[6]
 
             with st.expander(
-                f"💰 {nome} — R$ {valor:.2f} — {status}"
+                f"💰 {nome} — "
+                f"R$ {valor:.2f} — {status}"
             ):
 
-                st.write(f"**E-mail:** {email}")
-                st.write(f"**Biocoins:** {quantidade}")
-                st.write(f"**Valor:** R$ {valor:.2f}")
-                st.write(f"**Data:** {data_saque}")
-                st.write(f"**Status:** {status}")
+                st.write(
+                    f"**E-mail:** {email}"
+                )
+
+                st.write(
+                    f"**Biocoins:** {quantidade}"
+                )
+
+                st.write(
+                    f"**Valor:** R$ {valor:.2f}"
+                )
+
+                st.write(
+                    f"**Data:** {data_saque}"
+                )
+
+                st.write(
+                    f"**Status:** {status}"
+                )
 
                 if status == "Pendente":
 
@@ -1033,14 +1107,23 @@ def pagina_admin():
                             key=f"aprovar_saque_{saque_id}"
                         ):
 
-                            sucesso, mensagem = aprovar_saque(
-                                saque_id
+                            sucesso, mensagem = (
+                                aprovar_saque(
+                                    saque_id
+                                )
                             )
 
                             if sucesso:
-                                st.success(mensagem)
+
+                                st.success(
+                                    mensagem
+                                )
+
                             else:
-                                st.error(mensagem)
+
+                                st.error(
+                                    mensagem
+                                )
 
                             st.rerun()
 
@@ -1061,13 +1144,11 @@ def pagina_admin():
 
                             st.rerun()
 
-    # --------------------------------------------------------
-    # ATIVIDADES
-    # --------------------------------------------------------
-
     with abas[3]:
 
-        st.subheader("Atividades dos participantes")
+        st.subheader(
+            "Atividades dos participantes"
+        )
 
         st.markdown("### 🏋️ Treinos")
 
@@ -1080,48 +1161,28 @@ def pagina_admin():
                 treinos.data
             FROM treinos
             JOIN participantes
-            ON participantes.id = treinos.participante_id
+            ON participantes.id =
+                treinos.participante_id
             ORDER BY treinos.id DESC
         """).fetchall()
 
         conn.close()
 
         if treinos:
+
             for treino in treinos:
+
                 st.write(
                     f"**{treino[0]}** — "
                     f"{treino[1]} — "
                     f"{treino[2]}"
                 )
+
         else:
-            st.info("Nenhum treino registrado.")
 
-        st.markdown("### 🎮 Battle Within")
-
-        conn = conectar()
-
-        fases = conn.execute("""
-            SELECT
-                participantes.nome,
-                fases.fase,
-                fases.bio
-            FROM fases
-            JOIN participantes
-            ON participantes.id = fases.participante_id
-            ORDER BY fases.id DESC
-        """).fetchall()
-
-        conn.close()
-
-        if fases:
-            for fase in fases:
-                st.write(
-                    f"**{fase[0]}** — "
-                    f"Fase {fase[1]} — "
-                    f"+{fase[2]} Biocoins"
-                )
-        else:
-            st.info("Nenhuma fase registrada.")
+            st.info(
+                "Nenhum treino registrado."
+            )
 
         st.markdown("### 📸 Fotos")
 
@@ -1134,7 +1195,8 @@ def pagina_admin():
                 fotos.arquivo
             FROM fotos
             JOIN participantes
-            ON participantes.id = fotos.participante_id
+            ON participantes.id =
+                fotos.participante_id
             ORDER BY fotos.id DESC
         """).fetchall()
 
@@ -1158,12 +1220,11 @@ def pagina_admin():
                     )
 
         else:
-            st.info("Nenhuma foto enviada.")
 
+            st.info(
+                "Nenhuma foto enviada."
+            )
 
-# ============================================================
-# ÁREA DO PARTICIPANTE
-# ============================================================
 
 def pagina_participante():
 
@@ -1172,6 +1233,7 @@ def pagina_participante():
     )
 
     if not usuario:
+
         logout()
 
     usuario_id = usuario[0]
@@ -1185,12 +1247,8 @@ def pagina_participante():
     )
 
     st.write(
-        f"Olá, **{nome}**!"
+        f"Olá, **{nome}!**"
     )
-
-    # --------------------------------------------------------
-    # SALDO
-    # --------------------------------------------------------
 
     st.markdown(
         f"""
@@ -1210,11 +1268,8 @@ def pagina_participante():
         "🚪 Sair",
         key="participante_logout"
     ):
-        logout()
 
-    # --------------------------------------------------------
-    # LINKS
-    # --------------------------------------------------------
+        logout()
 
     st.subheader("Acessos")
 
@@ -1248,19 +1303,13 @@ def pagina_participante():
 
     with col4:
 
-        st.link_button(
-            "🎮 Battle Within",
-            BATTLE_WITHIN,
-            use_container_width=True
-        )
-
-    # --------------------------------------------------------
-    # TREINO
-    # --------------------------------------------------------
+        st.empty()
 
     st.divider()
 
-    st.subheader("🏋️ Registrar treino")
+    st.subheader(
+        "🏋️ Registrar treino"
+    )
 
     atividades = [
         "Peito / Ombro / Tríceps",
@@ -1291,18 +1340,24 @@ def pagina_participante():
         )
 
         if sucesso:
-            st.success(mensagem)
-            st.rerun()
-        else:
-            st.warning(mensagem)
 
-    # --------------------------------------------------------
-    # FOTO
-    # --------------------------------------------------------
+            st.success(
+                mensagem
+            )
+
+            st.rerun()
+
+        else:
+
+            st.warning(
+                mensagem
+            )
 
     st.divider()
 
-    st.subheader("📸 Foto semanal")
+    st.subheader(
+        "📸 Foto semanal"
+    )
 
     st.write(
         f"Você recebe **+{BIO_FOTO} Biocoins** "
@@ -1311,7 +1366,11 @@ def pagina_participante():
 
     arquivo = st.file_uploader(
         "Enviar foto",
-        type=["jpg", "jpeg", "png"],
+        type=[
+            "jpg",
+            "jpeg",
+            "png"
+        ],
         key="foto_semanal"
     )
 
@@ -1335,72 +1394,48 @@ def pagina_participante():
             )
 
             if sucesso:
-                st.success(mensagem)
+
+                st.success(
+                    mensagem
+                )
+
                 st.rerun()
+
             else:
-                st.warning(mensagem)
 
-    # --------------------------------------------------------
-    # BATTLE WITHIN
-    # --------------------------------------------------------
-
-    st.divider()
-
-    st.subheader("🎮 Battle Within")
-
-    st.write(
-        "Complete as fases e registre cada fase concluída."
-    )
-
-    fase = st.number_input(
-        "Número da fase",
-        min_value=1,
-        max_value=40,
-        value=1,
-        step=1,
-        key="numero_fase"
-    )
-
-    recompensa = recompensa_fase(fase)
-
-    st.info(
-        f"Fase {fase}: +{recompensa} Biocoins"
-    )
-
-    if st.button(
-        "🎮 Registrar fase concluída",
-        key="botao_fase",
-        use_container_width=True
-    ):
-
-        sucesso, mensagem = registrar_fase(
-            usuario_id,
-            fase
-        )
-
-        if sucesso:
-            st.success(mensagem)
-            st.rerun()
-        else:
-            st.warning(mensagem)
-
-    # --------------------------------------------------------
-    # MERCADO LIVRE
-    # --------------------------------------------------------
+                st.warning(
+                    mensagem
+                )
 
     st.divider()
 
-    st.subheader("🛒 Compra no Mercado Livre")
+    # ==========================================
+    # COMPRA MERCADO LIVRE
+    # ==========================================
+
+    st.subheader(
+        "🛒 Compra no Mercado Livre"
+    )
 
     st.write(
         "Faça sua compra pelo link do BioCore "
-        "e depois envie os dados da compra para validação."
+        "e depois envie os dados da compra "
+        "e o comprovante para validação."
     )
 
     st.link_button(
         "🛒 Abrir Mercado Livre",
         MERCADO_LIVRE,
         use_container_width=True
+    )
+
+    st.markdown(
+        f"**Participante:** {nome}"
+    )
+
+    st.caption(
+        "Seu nome é vinculado automaticamente "
+        "à compra."
     )
 
     descricao = st.text_input(
@@ -1415,20 +1450,58 @@ def pagina_participante():
         key="valor_compra"
     )
 
+    comprovante = st.file_uploader(
+        "Comprovante da compra",
+        type=[
+            "jpg",
+            "jpeg",
+            "png",
+            "pdf"
+        ],
+        key="comprovante_compra"
+    )
+
+    if comprovante:
+
+        if comprovante.type in [
+            "image/jpeg",
+            "image/png"
+        ]:
+
+            st.image(
+                comprovante,
+                caption="Comprovante selecionado",
+                width=300
+            )
+
+        else:
+
+            st.success(
+                "PDF selecionado."
+            )
+
     if st.button(
-        "Enviar compra para validação",
+        "📤 Enviar compra para validação",
         key="botao_compra",
         use_container_width=True
     ):
 
         if descricao.strip() == "":
+
             st.warning(
                 "Informe o produto."
             )
 
         elif valor <= 0:
+
             st.warning(
                 "Informe o valor da compra."
+            )
+
+        elif comprovante is None:
+
+            st.warning(
+                "Envie o comprovante da compra."
             )
 
         else:
@@ -1436,20 +1509,21 @@ def pagina_participante():
             registrar_compra(
                 usuario_id,
                 descricao,
-                valor
+                valor,
+                comprovante
             )
 
             st.success(
                 "Compra enviada para validação."
             )
 
-    # --------------------------------------------------------
-    # CASHBACK
-    # --------------------------------------------------------
+            st.rerun()
 
     st.divider()
 
-    st.subheader("💰 Cashback")
+    st.subheader(
+        "💰 Cashback"
+    )
 
     compras = contar_compras_validadas(
         usuario_id
@@ -1464,25 +1538,38 @@ def pagina_participante():
     )
 
     if saldo >= MINIMO_SAQUE:
+
         st.success(
             "Você atingiu 5.000 Biocoins."
         )
+
     else:
-        faltam = MINIMO_SAQUE - saldo
+
+        faltam = (
+            MINIMO_SAQUE - saldo
+        )
 
         st.info(
-            f"Faltam {faltam} Biocoins para atingir 5.000."
+            f"Faltam {faltam} Biocoins "
+            "para atingir 5.000."
         )
 
     if compras >= MINIMO_COMPRAS:
+
         st.success(
-            "Você possui pelo menos 2 compras validadas."
+            "Você possui pelo menos "
+            "2 compras validadas."
         )
+
     else:
-        faltam_compras = MINIMO_COMPRAS - compras
+
+        faltam_compras = (
+            MINIMO_COMPRAS - compras
+        )
 
         st.info(
-            f"Faltam {faltam_compras} compra(s) validada(s)."
+            f"Faltam {faltam_compras} "
+            "compra(s) validada(s)."
         )
 
     if st.button(
@@ -1496,22 +1583,27 @@ def pagina_participante():
         )
 
         if sucesso:
-            st.success(mensagem)
-            st.rerun()
-        else:
-            st.warning(mensagem)
 
-    # --------------------------------------------------------
-    # HISTÓRICO
-    # --------------------------------------------------------
+            st.success(
+                mensagem
+            )
+
+            st.rerun()
+
+        else:
+
+            st.warning(
+                mensagem
+            )
 
     st.divider()
 
-    st.subheader("📋 Meu histórico")
+    st.subheader(
+        "📋 Meu histórico"
+    )
 
-    aba1, aba2, aba3 = st.tabs([
+    aba1, aba2 = st.tabs([
         "🏋️ Treinos",
-        "🎮 Fases",
         "💰 Cashback"
     ])
 
@@ -1524,7 +1616,9 @@ def pagina_participante():
             FROM treinos
             WHERE participante_id = ?
             ORDER BY id DESC
-        """, (usuario_id,)).fetchall()
+        """, (
+            usuario_id,
+        )).fetchall()
 
         conn.close()
 
@@ -1533,10 +1627,12 @@ def pagina_participante():
             for registro in registros:
 
                 st.write(
-                    f"🏋️ {registro[0]} — {registro[1]}"
+                    f"🏋️ {registro[0]} "
+                    f"— {registro[1]}"
                 )
 
         else:
+
             st.info(
                 "Nenhum treino registrado."
             )
@@ -1546,38 +1642,13 @@ def pagina_participante():
         conn = conectar()
 
         registros = conn.execute("""
-            SELECT fase, bio
-            FROM fases
-            WHERE participante_id = ?
-            ORDER BY fase
-        """, (usuario_id,)).fetchall()
-
-        conn.close()
-
-        if registros:
-
-            for registro in registros:
-
-                st.write(
-                    f"🎮 Fase {registro[0]} "
-                    f"— +{registro[1]} Biocoins"
-                )
-
-        else:
-            st.info(
-                "Nenhuma fase registrada."
-            )
-
-    with aba3:
-
-        conn = conectar()
-
-        registros = conn.execute("""
             SELECT bio, valor, data, status
             FROM saques
             WHERE participante_id = ?
             ORDER BY id DESC
-        """, (usuario_id,)).fetchall()
+        """, (
+            usuario_id,
+        )).fetchall()
 
         conn.close()
 
@@ -1593,40 +1664,33 @@ def pagina_participante():
                 )
 
         else:
+
             st.info(
                 "Nenhuma solicitação de cashback."
             )
 
-    # --------------------------------------------------------
-    # REGRAS
-    # --------------------------------------------------------
-
     st.divider()
 
-    with st.expander("📜 Regras do BioCore"):
+    with st.expander(
+        "📜 Regras do BioCore"
+    ):
 
-        st.markdown("""
+        st.markdown(f"""
 ### 🪙 Biocoins
 
-- Treino: **+10 Biocoins**
-- Foto semanal: **+70 Biocoins**
+- Treino: **+{BIO_TREINO} Biocoins**
+- Foto semanal: **+{BIO_FOTO} Biocoins**
 - Máximo de 1 treino por dia.
 - Máximo de 1 foto por semana.
-
-### 🎮 Battle Within
-
-- Fases 1–10: **10 Biocoins por fase**
-- Fases 11–20: **20 Biocoins por fase**
-- Fases 21–30: **30 Biocoins por fase**
-- Fases 31–40: **40 Biocoins por fase**
-- Cada fase só pode gerar recompensa uma vez.
-- As 40 fases totalizam **1.000 Biocoins**.
 
 ### 🛒 Mercado Livre
 
 A compra precisa ser feita pelo link do BioCore.
 
-Depois, a compra será analisada e validada.
+Depois, o participante envia o produto,
+valor e comprovante.
+
+A compra será analisada e validada.
 
 O participante recebe **25% da comissão efetivamente recebida pelo BioCore**, convertida em Biocoins.
 
@@ -1637,10 +1701,6 @@ O participante recebe **25% da comissão efetivamente recebida pelo BioCore**, c
 - O pedido passa por análise administrativa.
         """)
 
-
-# ============================================================
-# TELA DE LOGIN / CADASTRO
-# ============================================================
 
 def pagina_login():
 
@@ -1658,10 +1718,6 @@ def pagina_login():
         "Criar conta",
         "Administrador"
     ])
-
-    # ========================================================
-    # ENTRAR
-    # ========================================================
 
     with entrar:
 
@@ -1689,7 +1745,9 @@ def pagina_login():
 
             if usuario:
 
-                st.session_state.usuario_id = usuario[0]
+                st.session_state.usuario_id = (
+                    usuario[0]
+                )
 
                 st.rerun()
 
@@ -1699,14 +1757,10 @@ def pagina_login():
                     "E-mail ou senha incorretos."
                 )
 
-    # ========================================================
-    # CADASTRO
-    # ========================================================
-
     with cadastro:
 
         nome = st.text_input(
-            "Nome",
+            "Nome completo",
             key="campo_nome_cadastro"
         )
 
@@ -1734,21 +1788,25 @@ def pagina_login():
         ):
 
             if not nome.strip():
+
                 st.warning(
-                    "Informe seu nome."
+                    "Informe seu nome completo."
                 )
 
             elif not email.strip():
+
                 st.warning(
                     "Informe seu e-mail."
                 )
 
             elif not senha:
+
                 st.warning(
                     "Informe uma senha."
                 )
 
             elif senha != confirmar:
+
                 st.error(
                     "As senhas não são iguais."
                 )
@@ -1764,7 +1822,8 @@ def pagina_login():
                 if sucesso:
 
                     st.success(
-                        "Conta criada! Agora você pode entrar."
+                        "Conta criada! "
+                        "Agora você pode entrar."
                     )
 
                 else:
@@ -1773,13 +1832,11 @@ def pagina_login():
                         "Esse e-mail já está cadastrado."
                     )
 
-    # ========================================================
-    # ADMIN
-    # ========================================================
-
     with administrador:
 
-        st.subheader("🛠️ Acesso administrativo")
+        st.subheader(
+            "🛠️ Acesso administrativo"
+        )
 
         admin_email = st.text_input(
             "E-mail do administrador",
@@ -1816,10 +1873,6 @@ def pagina_login():
                 )
 
 
-# ============================================================
-# ROTEAMENTO
-# ============================================================
-
 if st.session_state.admin_logado:
 
     pagina_admin()
@@ -1831,3 +1884,4 @@ elif st.session_state.usuario_id is not None:
 else:
 
     pagina_login()
+ 
