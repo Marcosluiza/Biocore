@@ -1,25 +1,38 @@
 import streamlit as st
 
+# ============================================================
+# CONFIGURAÇÃO
+# ============================================================
+
 st.set_page_config(
     page_title="BioCore",
     page_icon="🪙",
     layout="centered"
 )
 
-# =========================
-# CONFIGURAÇÕES
-# =========================
-
 LIMITE_BIO = 5000
+VALOR_BIO = 0.01
+
 BIO_TREINO = 10
 BIO_FOTO = 70
-VALOR_BIO = 0.01
+
 SENHA_ADMIN = "1234"
 
+ATIVIDADES = [
+    "Peito, ombro e tríceps",
+    "Costas e bíceps",
+    "Quadríceps, glúteos e panturrilhas",
+    "Perna completo",
+    "Abdômen",
+    "Peso corporal",
+    "Corrida",
+    "Futebol"
+]
 
-# =========================
+
+# ============================================================
 # MEMÓRIA
-# =========================
+# ============================================================
 
 if "usuarios" not in st.session_state:
     st.session_state.usuarios = {}
@@ -31,17 +44,17 @@ if "admin_logado" not in st.session_state:
     st.session_state.admin_logado = False
 
 
-# =========================
+# ============================================================
 # TÍTULO
-# =========================
+# ============================================================
 
 st.title("🪙 BioCore")
 st.write("Seu desafio. Seu BIO. Seu cashback.")
 
 
-# =========================================================
+# ============================================================
 # PARTICIPANTE LOGADO
-# =========================================================
+# ============================================================
 
 if st.session_state.usuario_logado != "":
 
@@ -52,16 +65,18 @@ if st.session_state.usuario_logado != "":
 
     st.success("Olá, " + nome + "! 👋")
 
-    if st.button("🚪 Sair da conta", use_container_width=True):
-
+    if st.button(
+        "🚪 Sair da conta",
+        use_container_width=True
+    ):
         st.session_state.usuario_logado = ""
         st.rerun()
 
     st.divider()
 
-    # =========================
+    # ========================================================
     # CASHBACK
-    # =========================
+    # ========================================================
 
     st.header("💰 Meu Cashback")
 
@@ -110,88 +125,159 @@ if st.session_state.usuario_logado != "":
             "🎉 Você atingiu R$50,00 de cashback."
         )
 
-    # =========================
-    # PROGRESSO
-    # =========================
+
+    # ========================================================
+    # TREINO / ATIVIDADE FÍSICA
+    # ========================================================
 
     st.divider()
 
-    st.header("📊 Meu progresso")
+    st.header("🏋️ Treino / Atividade Física")
 
-    col1, col2 = st.columns(2)
+    st.write(
+        "O que você treinou hoje?"
+    )
 
-    with col1:
+    atividade = st.selectbox(
+        "Escolha uma atividade",
+        ATIVIDADES
+    )
 
-        st.metric(
-            "🪙 BIO",
-            format(bio, ",")
-        )
-
-    with col2:
-
-        st.metric(
-            "🏋️ Treinos",
-            dados["treinos"]
-        )
-
-    # =========================
-    # TREINO
-    # =========================
-
-    st.divider()
-
-    st.header("🏋️ Registrar treino")
+    st.caption(
+        "Registre somente um treino por vez."
+    )
 
     if st.button(
         "➕ Registrar treino +10 BIO",
         use_container_width=True
     ):
 
+        registro = {
+            "atividade": atividade,
+            "status": "Registrado"
+        }
+
+        dados["treinos_lista"].append(registro)
+
         dados["bio"] += BIO_TREINO
+
         dados["treinos"] += 1
 
         st.success(
-            "Treino registrado! +10 BIO"
+            "Treino registrado: " +
+            atividade +
+            " | +10 BIO"
         )
 
         st.rerun()
 
-    # =========================
-    # FOTO
-    # =========================
+
+    # ========================================================
+    # HISTÓRICO DE TREINOS
+    # ========================================================
+
+    if len(dados["treinos_lista"]) > 0:
+
+        st.subheader("📋 Meus treinos")
+
+        for treino in reversed(dados["treinos_lista"]):
+
+            st.write(
+                "🏋️ " + treino["atividade"]
+            )
+
+
+    # ========================================================
+    # COMPROVAÇÃO
+    # ========================================================
+
+    st.divider()
 
     st.header("📸 Comprovação semanal")
 
+    st.write(
+        "Envie uma foto para comprovar seu treino."
+    )
+
     foto = st.file_uploader(
-        "Enviar foto do treino",
-        type=["jpg", "jpeg", "png"]
+        "Selecionar foto",
+        type=["jpg", "jpeg", "png"],
+        key="foto_upload"
     )
 
     if foto is not None:
 
         if st.button(
-            "📤 Enviar comprovação +70 BIO",
+            "📤 Enviar foto para análise",
             use_container_width=True
         ):
 
-            dados["bio"] += BIO_FOTO
-            dados["fotos"] += 1
+            comprovacao = {
+                "nome_arquivo": foto.name,
+                "status": "Pendente",
+                "bio_pago": False
+            }
+
+            dados["comprovacoes"].append(
+                comprovacao
+            )
 
             st.success(
-                "Comprovação enviada! +70 BIO"
+                "Foto enviada! Status: 🟡 Pendente"
             )
 
             st.rerun()
 
-    # =========================
+
+    # ========================================================
+    # STATUS DAS COMPROVAÇÕES
+    # ========================================================
+
+    if len(dados["comprovacoes"]) > 0:
+
+        st.subheader("📋 Minhas comprovações")
+
+        for comprovacao in reversed(
+            dados["comprovacoes"]
+        ):
+
+            nome_arquivo = comprovacao["nome_arquivo"]
+            status = comprovacao["status"]
+
+            if status == "Pendente":
+
+                st.warning(
+                    "🟡 " +
+                    nome_arquivo +
+                    " — Pendente"
+                )
+
+            elif status == "Aprovado":
+
+                st.success(
+                    "🟢 " +
+                    nome_arquivo +
+                    " — Aprovado (+70 BIO)"
+                )
+
+            else:
+
+                st.error(
+                    "🔴 " +
+                    nome_arquivo +
+                    " — Reprovado"
+                )
+
+
+    # ========================================================
     # TRUST WALLET
-    # =========================
+    # ========================================================
 
     st.divider()
 
     st.header("👛 Minha Trust Wallet")
 
-    st.write(
+    st.caption(
         "A Trust Wallet é opcional. "
         "Você pode adicionar depois."
     )
@@ -214,9 +300,10 @@ if st.session_state.usuario_logado != "":
 
         st.rerun()
 
-    # =========================
+
+    # ========================================================
     # CASHBACK
-    # =========================
+    # ========================================================
 
     st.divider()
 
@@ -242,9 +329,10 @@ if st.session_state.usuario_logado != "":
             "para solicitar até R$50,00."
         )
 
-    # =========================
+
+    # ========================================================
     # PARCEIROS
-    # =========================
+    # ========================================================
 
     st.divider()
 
@@ -263,9 +351,9 @@ if st.session_state.usuario_logado != "":
     )
 
 
-# =========================================================
-# LOGIN / CADASTRO / ADMIN
-# =========================================================
+# ============================================================
+# LOGIN / CADASTRO / ADMINISTRADOR
+# ============================================================
 
 else:
 
@@ -277,9 +365,10 @@ else:
         ]
     )
 
-    # =====================================================
+
+    # ========================================================
     # LOGIN
-    # =====================================================
+    # ========================================================
 
     with login:
 
@@ -323,11 +412,11 @@ else:
 
             else:
 
-                usuario = st.session_state.usuarios[email_login]
+                usuario = st.session_state.usuarios[
+                    email_login
+                ]
 
-                senha_correta = usuario["senha"]
-
-                if senha_login != senha_correta:
+                if senha_login != usuario["senha"]:
 
                     st.error(
                         "Senha incorreta."
@@ -343,9 +432,10 @@ else:
 
                     st.rerun()
 
-    # =====================================================
+
+    # ========================================================
     # CADASTRO
-    # =====================================================
+    # ========================================================
 
     with cadastro:
 
@@ -420,13 +510,25 @@ else:
             else:
 
                 st.session_state.usuarios[email] = {
+
                     "nome": nome,
+
                     "email": email,
+
                     "senha": senha,
+
                     "carteira": carteira,
+
                     "bio": 0,
+
                     "treinos": 0,
+
+                    "treinos_lista": [],
+
                     "fotos": 0,
+
+                    "comprovacoes": [],
+
                     "cashback_solicitado": False
                 }
 
@@ -435,12 +537,13 @@ else:
                 )
 
                 st.info(
-                    "Agora vá para Login e entre com seu e-mail e senha."
+                    "Agora vá para a aba Login e entre com seu e-mail e senha."
                 )
 
-    # =====================================================
+
+    # ========================================================
     # ADMINISTRADOR
-    # =====================================================
+    # ========================================================
 
     with admin:
 
@@ -474,9 +577,9 @@ else:
                 )
 
 
-# =========================================================
-# PAINEL ADMINISTRADOR
-# =========================================================
+# ============================================================
+# PAINEL DO ADMINISTRADOR
+# ============================================================
 
 if st.session_state.admin_logado:
 
@@ -493,6 +596,7 @@ if st.session_state.admin_logado:
 
         st.rerun()
 
+
     participantes = st.session_state.usuarios
 
     st.divider()
@@ -504,12 +608,24 @@ if st.session_state.admin_logado:
     total_bio = 0
     total_treinos = 0
     total_fotos = 0
+    total_pendentes = 0
 
     for pessoa in participantes.values():
 
         total_bio += pessoa["bio"]
+
         total_treinos += pessoa["treinos"]
-        total_fotos += pessoa["fotos"]
+
+        total_fotos += len(
+            pessoa["comprovacoes"]
+        )
+
+        for comprovacao in pessoa["comprovacoes"]:
+
+            if comprovacao["status"] == "Pendente":
+
+                total_pendentes += 1
+
 
     col1, col2 = st.columns(2)
 
@@ -523,9 +639,10 @@ if st.session_state.admin_logado:
     with col2:
 
         st.metric(
-            "🪙 BIO",
+            "🪙 BIO distribuído",
             format(total_bio, ",")
         )
+
 
     col3, col4 = st.columns(2)
 
@@ -539,9 +656,14 @@ if st.session_state.admin_logado:
     with col4:
 
         st.metric(
-            "📸 Fotos",
-            total_fotos
+            "🟡 Pendentes",
+            total_pendentes
         )
+
+
+    # ========================================================
+    # PARTICIPANTES
+    # ========================================================
 
     st.divider()
 
@@ -580,8 +702,13 @@ if st.session_state.admin_logado:
 
                 st.write(
                     "📸 Comprovações: " +
-                    str(pessoa["fotos"])
+                    str(len(pessoa["comprovacoes"]))
                 )
+
+
+                # --------------------------------------------
+                # CARTEIRA
+                # --------------------------------------------
 
                 st.write(
                     "👛 Trust Wallet:"
@@ -599,40 +726,148 @@ if st.session_state.admin_logado:
                         pessoa["carteira"]
                     )
 
+
+                # --------------------------------------------
+                # TREINOS
+                # --------------------------------------------
+
+                st.write(
+                    "### 🏋️ Histórico de treinos"
+                )
+
+                if len(pessoa["treinos_lista"]) == 0:
+
+                    st.write(
+                        "Nenhum treino registrado."
+                    )
+
+                else:
+
+                    for treino in reversed(
+                        pessoa["treinos_lista"]
+                    ):
+
+                        st.write(
+                            "🏋️ " +
+                            treino["atividade"]
+                        )
+
+
+                # --------------------------------------------
+                # COMPROVAÇÕES
+                # --------------------------------------------
+
+                st.write(
+                    "### 📸 Comprovações"
+                )
+
+                if len(pessoa["comprovacoes"]) == 0:
+
+                    st.write(
+                        "Nenhuma comprovação enviada."
+                    )
+
+                else:
+
+                    for indice in range(
+                        len(pessoa["comprovacoes"])
+                    ):
+
+                        comprovacao = pessoa[
+                            "comprovacoes"
+                        ][indice]
+
+                        st.write(
+                            "📄 " +
+                            comprovacao["nome_arquivo"]
+                        )
+
+                        st.write(
+                            "Status atual: " +
+                            comprovacao["status"]
+                        )
+
+
+                        # -------------------------------
+                        # PENDENTE
+                        # -------------------------------
+
+                        if comprovacao["status"] == "Pendente":
+
+                            col_a, col_b = st.columns(2)
+
+                            with col_a:
+
+                                if st.button(
+                                    "🟢 Aprovar",
+                                    key="aprovar_" +
+                                    email_pessoa +
+                                    "_" +
+                                    str(indice)
+                                ):
+
+                                    comprovacao["status"] = "Aprovado"
+
+                                    if not comprovacao["bio_pago"]:
+
+                                        pessoa["bio"] += BIO_FOTO
+
+                                        comprovacao["bio_pago"] = True
+
+                                    st.success(
+                                        "Comprovação aprovada! +70 BIO."
+                                    )
+
+                                    st.rerun()
+
+
+                            with col_b:
+
+                                if st.button(
+                                    "🔴 Reprovar",
+                                    key="reprovar_" +
+                                    email_pessoa +
+                                    "_" +
+                                    str(indice)
+                                ):
+
+                                    comprovacao["status"] = "Reprovado"
+
+                                    st.warning(
+                                        "Comprovação reprovada."
+                                    )
+
+                                    st.rerun()
+
+
+                        elif comprovacao["status"] == "Aprovado":
+
+                            st.success(
+                                "🟢 Aprovado — +70 BIO já concedido."
+                            )
+
+
+                        else:
+
+                            st.error(
+                                "🔴 Reprovado — 0 BIO."
+                            )
+
+
+                # --------------------------------------------
+                # CASHBACK
+                # --------------------------------------------
+
                 cashback = pessoa["bio"] * VALOR_BIO
 
-                if cashback > 50:
-                    cashback = 50
+                cashback = min(
+                    cashback,
+                    50
+                )
 
                 st.write(
                     "💰 Cashback: R$ " +
                     format(cashback, ".2f")
                 )
 
-                if pessoa["cashback_solicitado"]:
-
-                    st.warning(
-                        "⚠️ Cashback solicitado."
-                    )
-
-                    if st.button(
-                        "✅ Marcar como pago",
-                        key="pagar_" + email_pessoa
-                    ):
-
-                        pessoa["cashback_solicitado"] = False
-
-                        st.success(
-                            "Pagamento marcado como pago."
-                        )
-
-                        st.rerun()
-
-    st.divider()
-
-    st.subheader("📜 Regras")
-
-    st.write("🏋️ Treino: +10 BIO")
-    st.write("📸 Foto semanal: +70 BIO")
-    st.write("💰 5.000 BIO = até R$50,00")
-    st.write("🪙 1 BIO = R$0,01")
+                if pe
