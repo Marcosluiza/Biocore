@@ -1,137 +1,110 @@
 import streamlit as st
 
-# =========================
-# CONFIGURAÇÃO
-# =========================
-
 st.set_page_config(
     page_title="BioCore",
     page_icon="🪙",
     layout="centered"
 )
 
-LIMITE_BIO = 5000
-VALOR_POR_BIO = 0.01
+# -------------------------
+# CONFIGURAÇÕES
+# -------------------------
 
+LIMITE_BIO = 5000
 BIO_TREINO = 10
 BIO_FOTO = 70
-
 SENHA_ADMIN = "1234"
 
-
-# =========================
-# MEMÓRIA DA SESSÃO
-# =========================
+# -------------------------
+# MEMÓRIA
+# -------------------------
 
 if "participantes" not in st.session_state:
     st.session_state.participantes = {}
 
-if "usuario_atual" not in st.session_state:
-    st.session_state.usuario_atual = ""
+if "usuario" not in st.session_state:
+    st.session_state.usuario = ""
 
-if "admin_logado" not in st.session_state:
-    st.session_state.admin_logado = False
+if "admin" not in st.session_state:
+    st.session_state.admin = False
 
-
-# =========================
-# ESTILO
-# =========================
+# -------------------------
+# VISUAL
+# -------------------------
 
 st.markdown(
     """
     <style>
-
-    .cashback-box {
-        background: #f5f5f5;
+    .caixa {
         padding: 20px;
         border-radius: 15px;
-        margin-top: 10px;
+        background-color: #f2f2f2;
         margin-bottom: 20px;
     }
 
-    .cashback-title {
-        font-size: 16px;
-        font-weight: bold;
-    }
-
-    .cashback-value {
+    .valor {
         font-size: 32px;
         font-weight: bold;
-        margin-top: 5px;
-        margin-bottom: 15px;
     }
 
-    .progress-background {
+    .barra-fundo {
         width: 100%;
         height: 18px;
-        background: #dddddd;
+        background-color: #dddddd;
         border-radius: 10px;
         overflow: hidden;
     }
 
-    .progress-bar {
+    .barra {
         height: 18px;
-        background: #20c997;
-        border-radius: 10px;
+        background-color: #20c997;
     }
-
-    .bio-text {
-        margin-top: 10px;
-        font-size: 15px;
-    }
-
     </style>
     """,
     unsafe_allow_html=True
 )
 
-
-# =========================
-# CABEÇALHO
-# =========================
+# -------------------------
+# TÍTULO
+# -------------------------
 
 st.title("🪙 BioCore")
 st.write("Seu desafio. Seu BIO. Seu cashback.")
 
-
-# =========================
+# -------------------------
 # ABAS
-# =========================
+# -------------------------
 
-aba_participante, aba_admin = st.tabs(
+participante, administrador = st.tabs(
     ["👤 Participante", "🔐 Administrador"]
 )
 
-
-# ============================================================
+# =====================================================
 # PARTICIPANTE
-# ============================================================
+# =====================================================
 
-with aba_participante:
+with participante:
 
     st.header("👤 Participante")
 
-    nome = st.text_input(
-        "Nome",
-        placeholder="Digite seu nome"
-    )
+    nome = st.text_input("Nome")
 
     carteira = st.text_input(
-        "Endereço da Trust Wallet",
-        placeholder="Cole aqui seu endereço público da carteira"
+        "Endereço da Trust Wallet"
     )
 
-    if st.button("💾 Salvar cadastro", use_container_width=True):
+    if st.button(
+        "💾 Salvar cadastro",
+        use_container_width=True
+    ):
 
-        if nome.strip() == "":
+        if nome == "":
             st.warning("Digite seu nome.")
 
-        elif carteira.strip() == "":
-            st.warning("Digite o endereço da Trust Wallet.")
+        elif carteira == "":
+            st.warning("Digite sua carteira.")
 
         else:
-
-            nome = nome.strip()
 
             if nome not in st.session_state.participantes:
 
@@ -139,26 +112,24 @@ with aba_participante:
                     "carteira": carteira,
                     "bio": 0,
                     "treinos": 0,
-                    "fotos": 0,
-                    "cashback_solicitado": 0
+                    "fotos": 0
                 }
 
             else:
 
                 st.session_state.participantes[nome]["carteira"] = carteira
 
-            st.session_state.usuario_atual = nome
+            st.session_state.usuario = nome
 
             st.success("Cadastro salvo!")
 
+    # -------------------------
+    # DADOS DO PARTICIPANTE
+    # -------------------------
 
-    # =========================
-    # ÁREA DO USUÁRIO
-    # =========================
+    usuario = st.session_state.usuario
 
-    usuario = st.session_state.usuario_atual
-
-    if usuario in st.session_state.participantes:
+    if usuario != "" and usuario in st.session_state.participantes:
 
         dados = st.session_state.participantes[usuario]
 
@@ -168,60 +139,47 @@ with aba_participante:
 
         bio = dados["bio"]
 
-        if bio > LIMITE_BIO:
-            bio_exibido = LIMITE_BIO
-        else:
-            bio_exibido = bio
+        bio_barra = min(bio, LIMITE_BIO)
 
-        cashback = bio_exibido * VALOR_POR_BIO
+        cashback = bio_barra * 0.01
 
-        if cashback > 50:
-            cashback = 50
+        cashback = min(cashback, 50)
 
-        porcentagem = bio_exibido / LIMITE_BIO
-
-        if porcentagem > 1:
-            porcentagem = 1
-
-
-        # =========================
-        # CAIXA DE CASHBACK
-        # =========================
+        porcentagem = bio_barra / LIMITE_BIO
 
         st.markdown(
             f"""
-            <div class="cashback-box">
+            <div class="caixa">
 
-                <div class="cashback-title">
-                    Cashback disponível
-                </div>
+                <div>Cashback disponível</div>
 
-                <div class="cashback-value">
+                <div class="valor">
                     R$ {cashback:.2f}
                 </div>
 
-                <div class="progress-background">
+                <div class="barra-fundo">
 
                     <div
-                        class="progress-bar"
-                        style="width: {porcentagem * 100}%;">
+                        class="barra"
+                        style="width:{porcentagem * 100}%;">
                     </div>
 
                 </div>
 
-                <div class="bio-text">
-                    <strong>{bio_exibido:,} / {LIMITE_BIO:,} BIO</strong>
-                </div>
+                <p>
+                    <strong>
+                    {bio_barra:,} / {LIMITE_BIO:,} BIO
+                    </strong>
+                </p>
 
             </div>
             """,
             unsafe_allow_html=True
         )
 
+        if bio_barra < LIMITE_BIO:
 
-        faltam = LIMITE_BIO - bio_exibido
-
-        if faltam > 0:
+            faltam = LIMITE_BIO - bio_barra
 
             st.write(
                 f"Faltam **{faltam:,} BIO** para chegar a R$50,00."
@@ -229,41 +187,42 @@ with aba_participante:
 
         else:
 
-            st.success("🎉 Você atingiu o limite de R$50,00.")
+            st.success(
+                "🎉 Você chegou a R$50,00 de cashback."
+            )
 
+        # -------------------------
+        # PROGRESSO
+        # -------------------------
 
-        # =========================
-        # DADOS
-        # =========================
-
-        st.write("### 📊 Meu progresso")
+        st.subheader("📊 Meu progresso")
 
         col1, col2 = st.columns(2)
 
         with col1:
+
             st.metric(
                 "BIO",
                 f"{dados['bio']:,}"
             )
 
         with col2:
+
             st.metric(
                 "Treinos",
                 dados["treinos"]
             )
 
+        # -------------------------
+        # TREINO
+        # -------------------------
 
         st.divider()
 
-
-        # =========================
-        # TREINO
-        # =========================
-
-        st.subheader("🏋️ Registrar treino")
+        st.subheader("🏋️ Treino")
 
         if st.button(
-            f"➕ Registrar treino +{BIO_TREINO} BIO",
+            "➕ Registrar treino +10 BIO",
             use_container_width=True
         ):
 
@@ -271,27 +230,26 @@ with aba_participante:
             dados["treinos"] += 1
 
             st.success(
-                f"Treino registrado! +{BIO_TREINO} BIO"
+                "Treino registrado! +10 BIO"
             )
 
             st.rerun()
 
-
-        # =========================
+        # -------------------------
         # FOTO
-        # =========================
+        # -------------------------
 
-        st.subheader("📸 Comprovação semanal")
+        st.subheader("📸 Comprovação")
 
         foto = st.file_uploader(
-            "Envie a foto do treino",
+            "Enviar foto do treino",
             type=["jpg", "jpeg", "png"]
         )
 
         if foto is not None:
 
             if st.button(
-                f"📤 Enviar comprovação +{BIO_FOTO} BIO",
+                "📤 Enviar comprovação +70 BIO",
                 use_container_width=True
             ):
 
@@ -299,18 +257,16 @@ with aba_participante:
                 dados["fotos"] += 1
 
                 st.success(
-                    f"Comprovação enviada! +{BIO_FOTO} BIO"
+                    "Comprovação registrada! +70 BIO"
                 )
 
                 st.rerun()
 
+        # -------------------------
+        # CARTEIRA
+        # -------------------------
 
         st.divider()
-
-
-        # =========================
-        # TRUST WALLET
-        # =========================
 
         st.subheader("👛 Minha Trust Wallet")
 
@@ -318,12 +274,11 @@ with aba_participante:
             dados["carteira"]
         )
 
+        # -------------------------
+        # CASHBACK
+        # -------------------------
 
-        # =========================
-        # SOLICITAR CASHBACK
-        # =========================
-
-        st.subheader("💵 Solicitar cashback")
+        st.subheader("💵 Cashback")
 
         if bio >= LIMITE_BIO:
 
@@ -332,25 +287,21 @@ with aba_participante:
                 use_container_width=True
             ):
 
-                dados["cashback_solicitado"] = 50
-
                 st.success(
-                    "Solicitação enviada para o administrador."
+                    "Solicitação enviada ao administrador."
                 )
 
         else:
 
             st.info(
-                "Você precisa chegar a 5.000 BIO para solicitar até R$50,00."
+                "Chegue a 5.000 BIO para solicitar até R$50,00."
             )
 
+        # -------------------------
+        # LINKS
+        # -------------------------
 
         st.divider()
-
-
-        # =========================
-        # LOJAS
-        # =========================
 
         st.subheader("🛍️ Parceiros")
 
@@ -367,21 +318,160 @@ with aba_participante:
         )
 
 
-# ============================================================
+# =====================================================
 # ADMINISTRADOR
-# ============================================================
+# =====================================================
 
-with aba_admin:
+with administrador:
 
     st.header("🔐 Administrador")
 
-    if not st.session_state.admin_logado:
+    if not st.session_state.admin:
 
         senha = st.text_input(
-            "Senha do administrador",
+            "Senha",
             type="password"
         )
 
         if st.button(
             "🔓 Entrar",
-           
+            use_container_width=True
+        ):
+
+            if senha == SENHA_ADMIN:
+
+                st.session_state.admin = True
+
+                st.rerun()
+
+            else:
+
+                st.error(
+                    "Senha incorreta."
+                )
+
+    else:
+
+        st.success(
+            "Administrador conectado ✅"
+        )
+
+        if st.button(
+            "🚪 Sair",
+            use_container_width=True
+        ):
+
+            st.session_state.admin = False
+
+            st.rerun()
+
+        st.divider()
+
+        st.subheader("📊 Resumo")
+
+        participantes = st.session_state.participantes
+
+        total = len(participantes)
+
+        total_bio = sum(
+            p["bio"]
+            for p in participantes.values()
+        )
+
+        total_treinos = sum(
+            p["treinos"]
+            for p in participantes.values()
+        )
+
+        total_fotos = sum(
+            p["fotos"]
+            for p in participantes.values()
+        )
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+
+            st.metric(
+                "Participantes",
+                total
+            )
+
+        with col2:
+
+            st.metric(
+                "BIO",
+                f"{total_bio:,}"
+            )
+
+        col3, col4 = st.columns(2)
+
+        with col3:
+
+            st.metric(
+                "Treinos",
+                total_treinos
+            )
+
+        with col4:
+
+            st.metric(
+                "Fotos",
+                total_fotos
+            )
+
+        st.divider()
+
+        st.subheader("👥 Participantes")
+
+        if total == 0:
+
+            st.info(
+                "Nenhum participante cadastrado ainda."
+            )
+
+        else:
+
+            for nome_pessoa, dados in participantes.items():
+
+                with st.expander(
+                    f"👤 {nome_pessoa}"
+                ):
+
+                    st.write(
+                        f"🪙 BIO: {dados['bio']:,}"
+                    )
+
+                    st.write(
+                        f"🏋️ Treinos: {dados['treinos']}"
+                    )
+
+                    st.write(
+                        f"📸 Fotos: {dados['fotos']}"
+                    )
+
+                    st.write(
+                        "👛 Trust Wallet:"
+                    )
+
+                    st.code(
+                        dados["carteira"]
+                    )
+
+                    cashback = min(
+                        dados["bio"] * 0.01,
+                        50
+                    )
+
+                    st.write(
+                        f"💰 Cashback: R$ {cashback:.2f}"
+                    )
+
+        st.divider()
+
+        st.subheader("📜 Regras")
+
+        st.write("🏋️ Treino = +10 BIO")
+        st.write("📸 Foto semanal = +70 BIO")
+        st.write("💰 5.000 BIO = até R$50,00")
+        st.write("🪙 1 BIO = R$0,01")
