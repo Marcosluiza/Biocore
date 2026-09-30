@@ -869,5 +869,3 @@ if st.session_state.admin_logado:
                     "💰 Cashback: R$ " +
                     format(cashback, ".2f")
                 )
-
-                if pe
