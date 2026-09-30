@@ -23,8 +23,8 @@ BIO_FOTO = 70
 MINIMO_SAQUE = 5000
 MINIMO_COMPRAS = 2
 
-ADMIN_EMAIL = "admin@biocore.com"
-ADMIN_SENHA = "Troque_Esta_Senha_123"
+ADMIN_EMAIL = "tubaroesazuis@gmail.com"
+ADMIN_SENHA = "caboverde@1986"
 
 st.markdown("""
 <style>
