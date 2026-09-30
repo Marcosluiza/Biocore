@@ -1,423 +1,387 @@
 import streamlit as st
 
+# =========================
+# CONFIGURAÇÃO
+# =========================
+
 st.set_page_config(
     page_title="BioCore",
     page_icon="🪙",
     layout="centered"
 )
 
-# =========================
-# DADOS
-# =========================
-
-if "nome" not in st.session_state:
-    st.session_state.nome = ""
-
-if "carteira" not in st.session_state:
-    st.session_state.carteira = ""
-
-if "bio" not in st.session_state:
-    st.session_state.bio = 0
-
-if "treinos" not in st.session_state:
-    st.session_state.treinos = 0
-
-if "comprovacoes" not in st.session_state:
-    st.session_state.comprovacoes = 0
-
-# =========================
-# REGRAS DO BIOCORE
-# =========================
-
 LIMITE_BIO = 5000
-VALOR_BIO = 0.01
-LIMITE_CASHBACK = 50.00
+VALOR_POR_BIO = 0.01
 
-bio = st.session_state.bio
+BIO_TREINO = 10
+BIO_FOTO = 70
 
-cashback = min(
-    bio * VALOR_BIO,
-    LIMITE_CASHBACK
-)
+SENHA_ADMIN = "1234"
 
-porcentagem = min(
-    bio / LIMITE_BIO,
-    1.0
-)
 
-faltam = max(
-    LIMITE_BIO - bio,
-    0
-)
+# =========================
+# MEMÓRIA DA SESSÃO
+# =========================
+
+if "participantes" not in st.session_state:
+    st.session_state.participantes = {}
+
+if "usuario_atual" not in st.session_state:
+    st.session_state.usuario_atual = ""
+
+if "admin_logado" not in st.session_state:
+    st.session_state.admin_logado = False
+
 
 # =========================
 # ESTILO
 # =========================
 
-st.markdown("""
-<style>
+st.markdown(
+    """
+    <style>
 
-.main-title {
-    text-align: center;
-    font-size: 38px;
-    font-weight: bold;
-}
+    .cashback-box {
+        background: #f5f5f5;
+        padding: 20px;
+        border-radius: 15px;
+        margin-top: 10px;
+        margin-bottom: 20px;
+    }
 
-.subtitle {
-    text-align: center;
-    font-size: 18px;
-    margin-bottom: 25px;
-}
+    .cashback-title {
+        font-size: 16px;
+        font-weight: bold;
+    }
 
-.cashback-box {
-    background-color: #f5f5f5;
-    padding: 25px;
-    border-radius: 20px;
-    text-align: center;
-    margin-top: 10px;
-    margin-bottom: 20px;
-}
+    .cashback-value {
+        font-size: 32px;
+        font-weight: bold;
+        margin-top: 5px;
+        margin-bottom: 15px;
+    }
 
-.cashback-title {
-    font-size: 18px;
-}
+    .progress-background {
+        width: 100%;
+        height: 18px;
+        background: #dddddd;
+        border-radius: 10px;
+        overflow: hidden;
+    }
 
-.cashback-value {
-    font-size: 42px;
-    font-weight: bold;
-    margin: 10px 0 20px 0;
-}
+    .progress-bar {
+        height: 18px;
+        background: #20c997;
+        border-radius: 10px;
+    }
 
-.progress-background {
-    background-color: #dddddd;
-    border-radius: 20px;
-    height: 18px;
-    overflow: hidden;
-}
+    .bio-text {
+        margin-top: 10px;
+        font-size: 15px;
+    }
 
-.progress-bar {
-    height: 100%;
-    border-radius: 20px;
-    background-color: #21a366;
-}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
-.bio-text {
-    margin-top: 12px;
-    font-size: 16px;
-}
-
-</style>
-""", unsafe_allow_html=True)
 
 # =========================
 # CABEÇALHO
 # =========================
 
-st.markdown(
-    '<div class="main-title">🪙 BioCore</div>',
-    unsafe_allow_html=True
-)
+st.title("🪙 BioCore")
+st.write("Seu desafio. Seu BIO. Seu cashback.")
 
-st.markdown(
-    '<div class="subtitle">Seu desafio. Seu BIO. Seu cashback.</div>',
-    unsafe_allow_html=True
-)
-
-st.divider()
 
 # =========================
+# ABAS
+# =========================
+
+aba_participante, aba_admin = st.tabs(
+    ["👤 Participante", "🔐 Administrador"]
+)
+
+
+# ============================================================
 # PARTICIPANTE
-# =========================
+# ============================================================
 
-st.subheader("👤 Participante")
+with aba_participante:
 
-nome = st.text_input(
-    "Nome",
-    value=st.session_state.nome,
-    placeholder="Digite seu nome"
-)
+    st.header("👤 Participante")
 
-carteira = st.text_input(
-    "Endereço da Trust Wallet",
-    value=st.session_state.carteira,
-    placeholder="Cole aqui o endereço público da sua carteira"
-)
+    nome = st.text_input(
+        "Nome",
+        placeholder="Digite seu nome"
+    )
 
-if st.button(
-    "💾 Salvar cadastro",
-    use_container_width=True
-):
+    carteira = st.text_input(
+        "Endereço da Trust Wallet",
+        placeholder="Cole aqui seu endereço público da carteira"
+    )
 
-    if nome.strip() == "":
-        st.warning("Digite seu nome.")
+    if st.button("💾 Salvar cadastro", use_container_width=True):
 
-    elif carteira.strip() == "":
-        st.warning(
-            "Digite o endereço público da sua Trust Wallet."
-        )
+        if nome.strip() == "":
+            st.warning("Digite seu nome.")
 
-    else:
+        elif carteira.strip() == "":
+            st.warning("Digite o endereço da Trust Wallet.")
 
-        st.session_state.nome = nome
-        st.session_state.carteira = carteira
+        else:
 
-        st.success("Cadastro salvo com sucesso!")
+            nome = nome.strip()
 
-st.divider()
+            if nome not in st.session_state.participantes:
 
-# =========================
-# MEU CASHBACK
-# =========================
+                st.session_state.participantes[nome] = {
+                    "carteira": carteira,
+                    "bio": 0,
+                    "treinos": 0,
+                    "fotos": 0,
+                    "cashback_solicitado": 0
+                }
 
-st.subheader("💰 Meu Cashback")
+            else:
 
-st.markdown(
-    f"""
-    <div class="cashback-box">
+                st.session_state.participantes[nome]["carteira"] = carteira
 
-        <div class="cashback-title">
-            Cashback disponível
-        </div>
+            st.session_state.usuario_atual = nome
 
-        <div class="cashback-value">
-            R$ {cashback:.2f}
-        </div>
+            st.success("Cadastro salvo!")
 
-        <div class="progress-background">
 
-            <div
-                class="progress-bar"
-                style="width: {porcentagem * 100}%;">
+    # =========================
+    # ÁREA DO USUÁRIO
+    # =========================
+
+    usuario = st.session_state.usuario_atual
+
+    if usuario in st.session_state.participantes:
+
+        dados = st.session_state.participantes[usuario]
+
+        st.divider()
+
+        st.subheader("💰 Meu Cashback")
+
+        bio = dados["bio"]
+
+        if bio > LIMITE_BIO:
+            bio_exibido = LIMITE_BIO
+        else:
+            bio_exibido = bio
+
+        cashback = bio_exibido * VALOR_POR_BIO
+
+        if cashback > 50:
+            cashback = 50
+
+        porcentagem = bio_exibido / LIMITE_BIO
+
+        if porcentagem > 1:
+            porcentagem = 1
+
+
+        # =========================
+        # CAIXA DE CASHBACK
+        # =========================
+
+        st.markdown(
+            f"""
+            <div class="cashback-box">
+
+                <div class="cashback-title">
+                    Cashback disponível
+                </div>
+
+                <div class="cashback-value">
+                    R$ {cashback:.2f}
+                </div>
+
+                <div class="progress-background">
+
+                    <div
+                        class="progress-bar"
+                        style="width: {porcentagem * 100}%;">
+                    </div>
+
+                </div>
+
+                <div class="bio-text">
+                    <strong>{bio_exibido:,} / {LIMITE_BIO:,} BIO</strong>
+                </div>
+
             </div>
-
-        </div>
-
-        <div class="bio-text">
-            <strong>{bio:,} / {LIMITE_BIO:,} BIO</strong>
-        </div>
-
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-if bio < LIMITE_BIO:
-
-    st.info(
-        f"Faltam {faltam:,} BIO para chegar a R$ 50,00."
-    )
-
-else:
-
-    st.success(
-        "🎉 Você atingiu R$ 50,00 de cashback!"
-    )
-
-# =========================
-# SALDOS
-# =========================
-
-col1, col2 = st.columns(2)
-
-with col1:
-
-    st.metric(
-        "🪙 Saldo BIO",
-        f"{bio:,} BIO"
-    )
-
-with col2:
-
-    st.metric(
-        "💵 Cashback",
-        f"R$ {cashback:.2f}"
-    )
-
-# =========================
-# TREINOS
-# =========================
-
-st.divider()
-
-st.subheader("🏋️ Treinos")
-
-st.write(
-    "Registre seu treino e acumule BIO."
-)
-
-if st.button(
-    "🏋️ Registrar treino +10 BIO",
-    use_container_width=True
-):
-
-    st.session_state.treinos += 1
-    st.session_state.bio += 10
-
-    st.success(
-        "Treino registrado! Você ganhou 10 BIO."
-    )
-
-    st.rerun()
-
-st.write(
-    f"Treinos registrados: {st.session_state.treinos}"
-)
-
-# =========================
-# COMPROVAÇÃO
-# =========================
-
-st.divider()
-
-st.subheader("📸 Comprovação")
-
-arquivo = st.file_uploader(
-    "Envie a foto do seu treino",
-    type=["jpg", "jpeg", "png"]
-)
-
-if arquivo is not None:
-
-    st.image(
-        arquivo,
-        caption="Comprovação do treino",
-        use_container_width=True
-    )
-
-    if st.button(
-        "📤 Enviar comprovação +70 BIO",
-        use_container_width=True
-    ):
-
-        st.session_state.comprovacoes += 1
-        st.session_state.bio += 70
-
-        st.success(
-            "Comprovação enviada! Você ganhou 70 BIO."
+            """,
+            unsafe_allow_html=True
         )
 
-        st.rerun()
 
-# =========================
-# TRUST WALLET
-# =========================
+        faltam = LIMITE_BIO - bio_exibido
 
-st.divider()
+        if faltam > 0:
 
-st.subheader("👛 Minha Trust Wallet")
+            st.write(
+                f"Faltam **{faltam:,} BIO** para chegar a R$50,00."
+            )
 
-if st.session_state.carteira:
+        else:
 
-    st.code(
-        st.session_state.carteira
-    )
+            st.success("🎉 Você atingiu o limite de R$50,00.")
 
-    st.caption(
-        "Esse é o endereço público da sua carteira."
-    )
 
-else:
+        # =========================
+        # DADOS
+        # =========================
 
-    st.info(
-        "Cadastre sua Trust Wallet acima."
-    )
+        st.write("### 📊 Meu progresso")
 
-# =========================
-# RESGATAR CASHBACK
-# =========================
+        col1, col2 = st.columns(2)
 
-st.divider()
+        with col1:
+            st.metric(
+                "BIO",
+                f"{dados['bio']:,}"
+            )
 
-st.subheader("🎁 Resgatar Cashback")
+        with col2:
+            st.metric(
+                "Treinos",
+                dados["treinos"]
+            )
 
-st.write(
-    f"Cashback disponível: **R$ {cashback:.2f}**"
-)
 
-if cashback > 0:
+        st.divider()
 
-    if st.button(
-        "💵 Solicitar cashback",
-        use_container_width=True
-    ):
 
-        st.success(
-            "Solicitação de cashback enviada!"
+        # =========================
+        # TREINO
+        # =========================
+
+        st.subheader("🏋️ Registrar treino")
+
+        if st.button(
+            f"➕ Registrar treino +{BIO_TREINO} BIO",
+            use_container_width=True
+        ):
+
+            dados["bio"] += BIO_TREINO
+            dados["treinos"] += 1
+
+            st.success(
+                f"Treino registrado! +{BIO_TREINO} BIO"
+            )
+
+            st.rerun()
+
+
+        # =========================
+        # FOTO
+        # =========================
+
+        st.subheader("📸 Comprovação semanal")
+
+        foto = st.file_uploader(
+            "Envie a foto do treino",
+            type=["jpg", "jpeg", "png"]
         )
 
-        st.info(
-            "O BioCore irá analisar e processar o pagamento."
+        if foto is not None:
+
+            if st.button(
+                f"📤 Enviar comprovação +{BIO_FOTO} BIO",
+                use_container_width=True
+            ):
+
+                dados["bio"] += BIO_FOTO
+                dados["fotos"] += 1
+
+                st.success(
+                    f"Comprovação enviada! +{BIO_FOTO} BIO"
+                )
+
+                st.rerun()
+
+
+        st.divider()
+
+
+        # =========================
+        # TRUST WALLET
+        # =========================
+
+        st.subheader("👛 Minha Trust Wallet")
+
+        st.code(
+            dados["carteira"]
         )
 
-else:
 
-    st.warning(
-        "Você ainda não possui cashback disponível."
-    )
+        # =========================
+        # SOLICITAR CASHBACK
+        # =========================
 
-# =========================
-# BIO
-# =========================
+        st.subheader("💵 Solicitar cashback")
 
-st.divider()
+        if bio >= LIMITE_BIO:
 
-st.subheader("🪙 Meu BIO")
+            if st.button(
+                "💰 Solicitar R$50,00",
+                use_container_width=True
+            ):
 
-st.write(
-    f"Saldo atual: **{bio:,} BIO**"
-)
+                dados["cashback_solicitado"] = 50
 
-# =========================
-# BENEFÍCIOS
-# =========================
+                st.success(
+                    "Solicitação enviada para o administrador."
+                )
 
-st.divider()
+        else:
 
-st.subheader("🛒 Benefícios")
+            st.info(
+                "Você precisa chegar a 5.000 BIO para solicitar até R$50,00."
+            )
 
-col1, col2 = st.columns(2)
 
-with col1:
+        st.divider()
 
-    st.link_button(
-        "🛍️ Mercado Livre",
-        "https://www.mercadolivre.com.br/",
-        use_container_width=True
-    )
 
-with col2:
+        # =========================
+        # LOJAS
+        # =========================
 
-    st.link_button(
-        "⚡ CoreStryke",
-        "https://corestryke.com/",
-        use_container_width=True
-    )
+        st.subheader("🛍️ Parceiros")
 
-# =========================
-# RESUMO
-# =========================
+        st.link_button(
+            "🛒 Mercado Livre",
+            "https://www.mercadolivre.com.br/social/sama6231844",
+            use_container_width=True
+        )
 
-st.divider()
+        st.link_button(
+            "🏪 CoreStryke",
+            "https://corestryke.com",
+            use_container_width=True
+        )
 
-st.subheader("📊 Meu resumo")
 
-st.write(
-    f"👤 **Participante:** "
-    f"{st.session_state.nome or 'Não cadastrado'}"
-)
+# ============================================================
+# ADMINISTRADOR
+# ============================================================
 
-st.write(
-    f"🪙 **BIO:** {st.session_state.bio:,}"
-)
+with aba_admin:
 
-st.write(
-    f"💰 **Cashback:** R$ {cashback:.2f}"
-)
+    st.header("🔐 Administrador")
 
-st.write(
-    f"🏋️ **Treinos:** {st.session_state.treinos}"
-)
+    if not st.session_state.admin_logado:
 
-st.write(
-    f"📸 **Comprovações:** {st.session_state.comprovacoes}"
-)
+        senha = st.text_input(
+            "Senha do administrador",
+            type="password"
+        )
+
+        if st.button(
+            "🔓 Entrar",
+           
