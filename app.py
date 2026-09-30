@@ -131,4 +131,38 @@ st.markdown(
 st.markdown("## 🏪 CoreStryke")
 
 st.markdown(
-    f'<a class="botao" href="{CORESTRY
+    f'<a class="botao" href="{CORESTRYKE}" target="_blank">'
+    '🏪 ACESSAR CORESTRYKE'
+    '</a>',
+    unsafe_allow_html=True
+)
+
+# =========================
+# TRUST WALLET
+# =========================
+
+st.markdown("## 👛 Trust Wallet")
+
+st.markdown(
+    f'<a class="botao" href="{TRUST_WALLET}" target="_blank">'
+    '👛 ACESSAR TRUST WALLET'
+    '</a>',
+    unsafe_allow_html=True
+)
+
+# =========================
+# BIO
+# =========================
+
+st.markdown("## 🟢 BIO")
+
+st.markdown("""
+<div class="bio">
+<b>BioCoin (BIO)</b><br><br>
+Recompensas relacionadas às atividades e ao ecossistema BioCore.
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("---")
+
+st.caption("BioCore • Treino • Atividade Física • BIO")
