@@ -2,93 +2,133 @@ import streamlit as st
 
 st.set_page_config(
     page_title="BioCore",
-    page_icon="🏋️",
+    page_icon="🟢",
     layout="centered"
 )
 
 # =========================
-# LOGIN
+# LINKS
 # =========================
 
-if "logado" not in st.session_state:
-    st.session_state.logado = False
+MERCADO_LIVRE = "https://www.mercadolivre.com.br/social/sama6231844"
 
-if "usuario" not in st.session_state:
-    st.session_state.usuario = ""
+BATTLE_WITHIN = "https://drive.google.com/file/d/1VoOv0AacWqtweJBlmXd6awJe-bOdmfRX/view?usp=drivesdk"
 
-if not st.session_state.logado:
+CORESTRYKE = "https://corestryke.com"
 
-    st.title("BioCore")
-    st.subheader("Acesso do aluno")
-
-    usuario = st.text_input("Usuário")
-    senha = st.text_input("Senha", type="password")
-
-    if st.button("Entrar", use_container_width=True):
-
-        if usuario == "aluno1" and senha == "BioCore@2026!Teste":
-            st.session_state.logado = True
-            st.session_state.usuario = usuario
-            st.rerun()
-
-        else:
-            st.error("Usuário ou senha incorretos.")
-
-    st.stop()
-
+TRUST_WALLET = "https://trustwallet.com/"
 
 # =========================
-# ÁREA DO ALUNO
+# ESTILO
 # =========================
 
-st.title("TREINO / ATIVIDADE FÍSICA")
+st.markdown("""
+<style>
 
-st.write(
-    f"Bem-vindo, **{st.session_state.usuario}**!"
+.block-container {
+    max-width: 600px;
+    padding-top: 30px;
+}
+
+h1 {
+    text-align: center;
+}
+
+.subtitulo {
+    text-align: center;
+    font-size: 18px;
+    margin-bottom: 25px;
+}
+
+.botao {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    margin: 12px 0;
+    border-radius: 12px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: bold;
+    background: #eeeeee;
+    color: #111111;
+}
+
+.botao:hover {
+    opacity: 0.85;
+}
+
+.bio {
+    padding: 18px;
+    border-radius: 15px;
+    background: #f1f1f1;
+    text-align: center;
+    margin: 20px 0;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+# =========================
+# CABEÇALHO
+# =========================
+
+st.title("🟢 BioCore")
+
+st.markdown(
+    '<div class="subtitulo">Treino • Atividade Física • BIO • Benefícios</div>',
+    unsafe_allow_html=True
 )
 
-st.divider()
-
+# =========================
 # TREINO
-st.subheader("🏋️ Treino")
+# =========================
 
-if st.button("Registrar treino", use_container_width=True):
-    st.success("Treino registrado!")
+st.markdown("## 🏋️ Treino / Atividade Física")
 
+st.markdown("""
+<div class="bio">
+Registre suas atividades físicas e participe do sistema de recompensas BioCore.
+</div>
+""", unsafe_allow_html=True)
 
-# ATIVIDADE FÍSICA
-st.subheader("🏃 Atividade Física")
+# =========================
+# BATTLE WITHIN
+# =========================
 
-if st.button("Registrar atividade física", use_container_width=True):
-    st.success("Atividade física registrada!")
+st.markdown("## 🎮 Battle Within")
 
+st.markdown("""
+<div class="bio">
+Jogue o Battle Within no seu celular Android.
+</div>
+""", unsafe_allow_html=True)
 
-# COMPROVANTE
-st.subheader("📸 Comprovante")
-
-foto = st.file_uploader(
-    "Enviar foto do treino ou atividade",
-    type=["jpg", "jpeg", "png"]
+st.markdown(
+    f'<a class="botao" href="{BATTLE_WITHIN}" target="_blank">'
+    '🎮 BAIXAR BATTLE WITHIN'
+    '</a>',
+    unsafe_allow_html=True
 )
 
-if foto is not None:
-    st.success("Foto recebida!")
+# =========================
+# MERCADO LIVRE
+# =========================
 
+st.markdown("## 🛒 Mercado Livre")
 
-# BIO
-st.divider()
+st.markdown(
+    f'<a class="botao" href="{MERCADO_LIVRE}" target="_blank">'
+    '🛒 COMPRAR NO MERCADO LIVRE'
+    '</a>',
+    unsafe_allow_html=True
+)
 
-st.subheader("🪙 BIO")
+# =========================
+# CORESTRYKE
+# =========================
 
-st.write("Saldo atual: **0 BIO**")
+st.markdown("## 🏪 CoreStryke")
 
-st.write("Histórico de recompensas aparecerá aqui.")
-
-
-# SAIR
-st.divider()
-
-if st.button("Sair", use_container_width=True):
-    st.session_state.logado = False
-    st.session_state.usuario = ""
-    st.rerun()
+st.markdown(
+    f'<a class="botao" href="{CORESTRY
