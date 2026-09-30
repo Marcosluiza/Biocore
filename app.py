@@ -18,7 +18,7 @@ if not st.session_state.logado:
     senha = st.text_input("Senha", type="password")
 
     if st.button("Entrar", use_container_width=True):
-     if usuario == "aluno1" and senha == "BioCore@2026!Teste":
+    if usuario == "aluno1" and senha == "BioCore@2026!Teste":
         
             st.session_state.logado = True
             st.session_state.usuario = usuario
