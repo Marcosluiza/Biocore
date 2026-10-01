@@ -35,7 +35,7 @@ if "admin_logado" not in st.session_state:
 # =========================
 
 st.title("🧬 BioCore")
-st.caption("Treine, participe e acumule BIO.")
+st.caption("Treine, participe e acumule BIOCOINS.")
 
 
 # ============================================================
