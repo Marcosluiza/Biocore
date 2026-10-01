@@ -821,13 +821,13 @@ if st.session_state.admin_logado:
                             comprovacao["status"]
                         )
                  
-                        if "arquivo" in comprovacao:
+                                                if "arquivo" in comprovacao:
 
-                        st.image(
-                                   comprovacao["arquivo"],
-                                   caption=comprovacao["nome_arquivo"],
-                                    width=300
-    ) 
+                            st.image(
+                                comprovacao["arquivo"],
+                                caption=comprovacao["nome_arquivo"],
+                                width=300
+                            )
     
                         if comprovacao["status"] == "Pendente":
 
