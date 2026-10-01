@@ -821,7 +821,7 @@ if st.session_state.admin_logado:
                             comprovacao["status"]
                         )
                  
-                       if "arquivo" in comprovacao:
+                        if "arquivo" in comprovacao:
 
                         st.image(
                                    comprovacao["arquivo"],
