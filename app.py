@@ -1,12 +1,8 @@
 import streamlit as st
 
-# =========================
-# CONFIGURAÇÃO
-# =========================
-
 st.set_page_config(
     page_title="BioCore",
-    page_icon="🧬",
+    page_icon="🧿",
     layout="centered"
 )
 
@@ -43,7 +39,7 @@ st.caption("Treine, participe e acumule BIO.")
 
 
 # ============================================================
-# ÁREA DO PARTICIPANTE LOGADO
+# PARTICIPANTE
 # ============================================================
 
 if st.session_state.usuario_logado is not None:
@@ -65,10 +61,8 @@ if st.session_state.usuario_logado is not None:
 
     bio_atual = pessoa["bio"]
 
-    cashback = bio_atual * VALOR_BIO
-
     cashback = min(
-        cashback,
+        bio_atual * VALOR_BIO,
         50
     )
 
@@ -129,12 +123,14 @@ if st.session_state.usuario_logado is not None:
             " BIO para chegar a R$50,00."
         )
     else:
-        st.write("Você atingiu o limite de R$50,00 de cashback. 🎉")
+        st.write(
+            "Você atingiu o limite de R$50,00 de cashback. 🎉"
+        )
 
     st.divider()
 
     # =========================
-    # TREINO / ATIVIDADE FÍSICA
+    # TREINO
     # =========================
 
     st.subheader("🏋️ Treino / Atividade Física")
@@ -179,13 +175,20 @@ if st.session_state.usuario_logado is not None:
 
     st.write(
         "Total de treinos registrados: " +
-        str(len(pessoa.get("treinos_lista", [])))
+        str(
+            len(
+                pessoa.get(
+                    "treinos_lista",
+                    []
+                )
+            )
+        )
     )
 
     st.divider()
 
     # =========================
-    # HISTÓRICO DE TREINOS
+    # HISTÓRICO
     # =========================
 
     if len(pessoa.get("treinos_lista", [])) > 0:
@@ -317,7 +320,7 @@ if st.session_state.usuario_logado is not None:
     st.divider()
 
     # =========================
-    # SOLICITAÇÃO DE CASHBACK
+    # CASHBACK
     # =========================
 
     st.subheader("💵 Solicitar cashback")
@@ -328,20 +331,31 @@ if st.session_state.usuario_logado is not None:
             "Cashback disponível: R$50,00"
         )
 
-        if pessoa.get("cashback_solicitado", False):
+        if pessoa.get(
+            "cashback_solicitado",
+            False
+        ):
 
-            if pessoa.get("cashback_pago", False):
+            if pessoa.get(
+                "cashback_pago",
+                False
+            ):
+
                 st.success(
                     "Cashback marcado como pago pelo administrador. ✅"
                 )
+
             else:
+
                 st.info(
                     "Seu cashback já foi solicitado e está aguardando pagamento."
                 )
 
         else:
 
-            if st.button("Solicitar cashback de R$50,00"):
+            if st.button(
+                "Solicitar cashback de R$50,00"
+            ):
 
                 pessoa["cashback_solicitado"] = True
                 pessoa["cashback_pago"] = False
@@ -433,7 +447,7 @@ if st.session_state.usuario_logado is not None:
 ### 🏋️ Treinos e atividades
 
 - Cada treino/atividade física registrado vale **+10 BIO**.
-- Deve ser registrado **um treino por vez**.
+- Deve ser registrado um treino por vez.
 
 ### 📸 Foto semanal
 
@@ -445,17 +459,15 @@ if st.session_state.usuario_logado is not None:
 
 ### 🛒 Mercado Livre
 
-- Faça suas compras através do **link de afiliado BioCore**.
+- Faça suas compras através do link de afiliado BioCore.
 - **25% da comissão gerada pela compra é revertida ao participante em BIO**.
 - O valor recebido depende da comissão efetivamente gerada pela compra.
 
 ### 🏪 CoreStryke
 
-- Os BIO acumulados podem ser utilizados para obter **descontos nas compras da CoreStryke**.
-- O desconto é calculado de acordo com a quantidade de BIO disponível, conforme a tabela de conversão do BioCore.
-- **Os BIO utilizados em uma compra são descontados do saldo do participante.**
-- **BIO utilizado em desconto na CoreStryke deixa de contar para o cashback.**
-- **O mesmo BIO não pode ser utilizado duas vezes: ou é usado como desconto na CoreStryke, ou permanece disponível para o cashback.**
+- Os BIO acumulados podem ser utilizados para obter descontos nas compras da CoreStryke.
+- Os BIO utilizados em uma compra são descontados do saldo do participante.
+- BIO utilizado em desconto na CoreStryke deixa de contar para o cashback.
 
 ### 💰 Cashback
 
@@ -467,7 +479,7 @@ if st.session_state.usuario_logado is not None:
 
 
 # ============================================================
-# ÁREA DE LOGIN / CADASTRO / ADMINISTRADOR
+# LOGIN / CADASTRO / ADMIN
 # ============================================================
 
 else:
@@ -499,7 +511,10 @@ else:
             key="login_senha"
         )
 
-        if st.button("Entrar", key="botao_login"):
+        if st.button(
+            "Entrar",
+            key="botao_login"
+        ):
 
             email_login = email_login.strip().lower()
 
@@ -571,29 +586,19 @@ else:
             email_novo = email.strip().lower()
 
             if nome.strip() == "":
-                st.error(
-                    "Digite seu nome."
-                )
+                st.error("Digite seu nome.")
 
             elif email_novo == "":
-                st.error(
-                    "Digite seu e-mail."
-                )
+                st.error("Digite seu e-mail.")
 
             elif senha == "":
-                st.error(
-                    "Digite uma senha."
-                )
+                st.error("Digite uma senha.")
 
             elif senha != confirmar_senha:
-                st.error(
-                    "As senhas não são iguais."
-                )
+                st.error("As senhas não são iguais.")
 
             elif email_novo in st.session_state.usuarios:
-                st.error(
-                    "Este e-mail já está cadastrado."
-                )
+                st.error("Este e-mail já está cadastrado.")
 
             else:
 
@@ -677,10 +682,6 @@ if st.session_state.admin_logado:
 
     st.divider()
 
-    # =========================
-    # LISTA DE PARTICIPANTES
-    # =========================
-
     if len(usuarios) == 0:
 
         st.info(
@@ -692,7 +693,8 @@ if st.session_state.admin_logado:
         for email_participante, pessoa in usuarios.items():
 
             st.subheader(
-                "👤 " + pessoa["nome"]
+                "👤 " +
+                pessoa["nome"]
             )
 
             st.write(
@@ -735,11 +737,14 @@ if st.session_state.admin_logado:
             )
 
             if wallet_admin:
+
                 st.write(
                     "👛 Trust Wallet: " +
                     wallet_admin
                 )
+
             else:
+
                 st.write(
                     "👛 Trust Wallet: não cadastrada"
                 )
@@ -758,7 +763,7 @@ if st.session_state.admin_logado:
             )
 
             # =========================
-            # HISTÓRICO DE TREINOS
+            # HISTÓRICO
             # =========================
 
             with st.expander(
@@ -822,7 +827,10 @@ if st.session_state.admin_logado:
                             comprovacao["status"]
                         )
 
-                        # MOSTRAR A FOTO
+                        # =========================
+                        # MOSTRAR FOTO
+                        # =========================
+
                         if "arquivo" in comprovacao:
 
                             st.image(
@@ -831,7 +839,10 @@ if st.session_state.admin_logado:
                                 width=300
                             )
 
+                        # =========================
                         # APROVAR / REPROVAR
+                        # =========================
+
                         if comprovacao["status"] == "Pendente":
 
                             coluna1, coluna2 = st.columns(2)
@@ -840,8 +851,14 @@ if st.session_state.admin_logado:
 
                                 if st.button(
                                     "🟢 Aprovar",
-                                    key=(
-                                        "aprovar_" +
-                                        email_participante +
-                                        "_" +
-                        
+                                    key="aprovar_" + email_participante + "_" + str(indice)
+                                ):
+
+                                    comprovacao["status"] = "Aprovado"
+
+                                    if not comprovacao.get(
+                                        "bio_pago",
+                                        False
+                                    ):
+
+                                        pessoa["bio"] += B
