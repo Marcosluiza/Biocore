@@ -78,40 +78,44 @@ if st.session_state.usuario_logado is not None:
     )
 
     st.subheader("💰 MEU CASHBACK")
-
+    
     st.markdown(
-        """
+    """
+    <div style="
+        padding:20px;
+        border-radius:15px;
+        border:1px solid #ddd;
+        margin-bottom:15px;
+    ">
+    <h2>R$ {:.2f}</h2>
+
+    <div style="
+        background:#eeeeee;
+        border-radius:10px;
+        height:18px;
+        width:100%;
+    ">
         <div style="
-            padding:20px;
-            border-radius:15px;
-            border:1px solid #ddd;
-            margin-bottom:15px;
-        ">
-        <h2>R$ {:.2f}</h2>
-        <div style="
-            background:#eeeeee;
-            border-radius:10px;
+            background:#21ba45;
+            width:{:.1f}%;
             height:18px;
-            width:100%;
-        ">
-            <div style="
-                background:#21ba45;
-                width:{:.1f}%;
-                height:18px;
-                border-radius:10px;
-            "></div>
-        </div>
-        <p>{:.1f}%</p>
-        <p><b>{:,} / {:,} BIO</b></p>
-        </div>
-        """.format(
-            cashback,
-            percentual,
-            percentual,
-            bio_atual,
-            LIMITE_BIO
-        ).replace(",", ".")
-    )
+            border-radius:10px;
+        "></div>
+    </div>
+
+    <p>{:.1f}%</p>
+    <p><b>{:,} / {:,} BIO</b></p>
+
+    </div>
+    """.format(
+        cashback,
+        percentual,
+        percentual,
+        bio_atual,
+        LIMITE_BIO
+    ).replace(",", "."),
+    unsafe_allow_html=True
+)
 
     bio_faltante = max(
         LIMITE_BIO - bio_atual,
