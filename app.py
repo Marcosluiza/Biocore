@@ -34,7 +34,7 @@ if "admin_logado" not in st.session_state:
 # TÍTULO
 # =========================
 
-st.title("🧬 BioCore")
+st.title("🧿 BioCore")
 st.caption("Treine, participe e acumule BIOCOINS.")
 
 
