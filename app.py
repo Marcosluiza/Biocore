@@ -231,12 +231,14 @@ if st.session_state.usuario_logado is not None:
                 pessoa["comprovacoes"] = []
 
             pessoa["comprovacoes"].append(
-                {
-                    "nome_arquivo": foto.name,
-                    "status": "Pendente",
-                    "bio_pago": False
-                }
-            )
+    {
+        "nome_arquivo": foto.name,
+        "arquivo": foto.getvalue(),
+        "tipo": foto.type,
+        "status": "Pendente",
+        "bio_pago": False
+    }
+)
 
             st.success(
                 "Foto enviada! Aguarde a aprovação do administrador. 🟡"
