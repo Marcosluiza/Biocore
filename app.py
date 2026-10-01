@@ -78,44 +78,44 @@ if st.session_state.usuario_logado is not None:
     )
 
     st.subheader("💰 MEU CASHBACK")
-    
+
     st.markdown(
-    """
-    <div style="
-        padding:20px;
-        border-radius:15px;
-        border:1px solid #ddd;
-        margin-bottom:15px;
-    ">
-    <h2>R$ {:.2f}</h2>
-
-    <div style="
-        background:#eeeeee;
-        border-radius:10px;
-        height:18px;
-        width:100%;
-    ">
+        """
         <div style="
-            background:#21ba45;
-            width:{:.1f}%;
-            height:18px;
+            padding:20px;
+            border-radius:15px;
+            border:1px solid #ddd;
+            margin-bottom:15px;
+        ">
+        <h2>R$ {:.2f}</h2>
+
+        <div style="
+            background:#eeeeee;
             border-radius:10px;
-        "></div>
-    </div>
+            height:18px;
+            width:100%;
+        ">
+            <div style="
+                background:#21ba45;
+                width:{:.1f}%;
+                height:18px;
+                border-radius:10px;
+            "></div>
+        </div>
 
-    <p>{:.1f}%</p>
-    <p><b>{:,} / {:,} BIO</b></p>
+        <p>{:.1f}%</p>
+        <p><b>{:,} / {:,} BIO</b></p>
 
-    </div>
-    """.format(
-        cashback,
-        percentual,
-        percentual,
-        bio_atual,
-        LIMITE_BIO
-    ).replace(",", "."),
-    unsafe_allow_html=True
-)
+        </div>
+        """.format(
+            cashback,
+            percentual,
+            percentual,
+            bio_atual,
+            LIMITE_BIO
+        ).replace(",", "."),
+        unsafe_allow_html=True
+    )
 
     bio_faltante = max(
         LIMITE_BIO - bio_atual,
@@ -196,6 +196,7 @@ if st.session_state.usuario_logado is not None:
             reversed(pessoa["treinos_lista"]),
             1
         ):
+
             st.write(
                 str(numero) +
                 ". " +
@@ -231,14 +232,14 @@ if st.session_state.usuario_logado is not None:
                 pessoa["comprovacoes"] = []
 
             pessoa["comprovacoes"].append(
-    {
-        "nome_arquivo": foto.name,
-        "arquivo": foto.getvalue(),
-        "tipo": foto.type,
-        "status": "Pendente",
-        "bio_pago": False
-    }
-)
+                {
+                    "nome_arquivo": foto.name,
+                    "arquivo": foto.getvalue(),
+                    "tipo": foto.type,
+                    "status": "Pendente",
+                    "bio_pago": False
+                }
+            )
 
             st.success(
                 "Foto enviada! Aguarde a aprovação do administrador. 🟡"
@@ -820,15 +821,17 @@ if st.session_state.admin_logado:
                             "Status: " +
                             comprovacao["status"]
                         )
-                 
-                                                if "arquivo" in comprovacao:
+
+                        # MOSTRAR A FOTO
+                        if "arquivo" in comprovacao:
 
                             st.image(
                                 comprovacao["arquivo"],
                                 caption=comprovacao["nome_arquivo"],
                                 width=300
                             )
-    
+
+                        # APROVAR / REPROVAR
                         if comprovacao["status"] == "Pendente":
 
                             coluna1, coluna2 = st.columns(2)
@@ -841,96 +844,4 @@ if st.session_state.admin_logado:
                                         "aprovar_" +
                                         email_participante +
                                         "_" +
-                                        str(indice)
-                                    )
-                                ):
-
-                                    comprovacao["status"] = "Aprovado"
-
-                                    if not comprovacao.get(
-                                        "bio_pago",
-                                        False
-                                    ):
-
-                                        pessoa["bio"] += BIO_FOTO
-
-                                        comprovacao["bio_pago"] = True
-
-                                    st.success(
-                                        "Foto aprovada! +70 BIO."
-                                    )
-
-                                    st.rerun()
-
-                            with coluna2:
-
-                                if st.button(
-                                    "🔴 Reprovar",
-                                    key=(
-                                        "reprovar_" +
-                                        email_participante +
-                                        "_" +
-                                        str(indice)
-                                    )
-                                ):
-
-                                    comprovacao["status"] = "Reprovado"
-                                    comprovacao["bio_pago"] = False
-
-                                    st.warning(
-                                        "Foto reprovada. 0 BIO."
-                                    )
-
-                                    st.rerun()
-
-            # =========================
-            # CASHBACK
-            # =========================
-
-            with st.expander(
-                "💵 Solicitação de cashback"
-            ):
-
-                if pessoa.get(
-                    "cashback_solicitado",
-                    False
-                ):
-
-                    st.write(
-                        "🟡 Cashback solicitado."
-                    )
-
-                    if pessoa.get(
-                        "cashback_pago",
-                        False
-                    ):
-
-                        st.success(
-                            "🟢 Cashback marcado como pago."
-                        )
-
-                    else:
-
-                        if st.button(
-                            "💰 Marcar cashback como pago",
-                            key=(
-                                "pagar_" +
-                                email_participante
-                            )
-                        ):
-
-                            pessoa["cashback_pago"] = True
-
-                            st.success(
-                                "Cashback marcado como pago."
-                            )
-
-                            st.rerun()
-
-                else:
-
-                    st.write(
-                        "Nenhuma solicitação de cashback."
-                    )
-
-            st.divider()
+                        
