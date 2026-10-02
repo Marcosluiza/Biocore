@@ -1,212 +1,486 @@
 import streamlit as st
+import requests
+import hashlib
+import secrets
+import binascii
+from datetime import datetime, timedelta, timezone
+
+# =========================
+# CONFIGURAÇÃO
+# =========================
 
 st.set_page_config(
     page_title="BioCore",
-    page_icon="🧿",
+    page_icon="💪",
     layout="centered"
 )
 
-LIMITE_BIO = 5000
-VALOR_BIO = 0.01
+SUPABASE_URL = st.secrets["SUPABASE_URL"]
+SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+
+HEADERS = {
+    "apikey": SUPABASE_KEY,
+    "Authorization": f"Bearer {SUPABASE_KEY}",
+    "Content-Type": "application/json"
+}
+
+BUCKET = "Comprovacoes"
+
 BIO_TREINO = 10
 BIO_FOTO = 70
-SENHA_ADMIN = "1234"
-
-MERCADO_LIVRE_LINK = "https://www.mercadolivre.com.br/social/sama6231844"
-CORESTRYKE_LINK = "https://corestryke.com"
-
+LIMITE_BIO = 5000
+VALOR_BIO = 0.01
 
 # =========================
-# DADOS DA SESSÃO
+# FUNÇÕES DE SENHA
 # =========================
 
-if "usuarios" not in st.session_state:
-    st.session_state.usuarios = {}
+def hash_password(password):
+    salt = secrets.token_bytes(16)
 
-if "usuario_logado" not in st.session_state:
-    st.session_state.usuario_logado = None
-
-if "admin_logado" not in st.session_state:
-    st.session_state.admin_logado = False
-
-
-# =========================
-# TÍTULO
-# =========================
-
-st.title("🧿 BioCore")
-st.caption("Treine, participe e acumule BIOCOINS.")
-
-
-# ============================================================
-# PARTICIPANTE
-# ============================================================
-
-if st.session_state.usuario_logado is not None:
-
-    email_logado = st.session_state.usuario_logado
-    pessoa = st.session_state.usuarios[email_logado]
-
-    st.write("Olá, " + pessoa["nome"] + "! 👋")
-
-    if st.button("🚪 Sair"):
-        st.session_state.usuario_logado = None
-        st.rerun()
-
-    st.divider()
-
-    # =========================
-    # CASHBACK
-    # =========================
-
-    bio_atual = pessoa["bio"]
-
-    cashback = min(
-        bio_atual * VALOR_BIO,
-        50
+    pwd_hash = hashlib.pbkdf2_hmac(
+        "sha256",
+        password.encode(),
+        salt,
+        200000
     )
 
-    percentual = min(
-        bio_atual / LIMITE_BIO * 100,
-        100
+    return (
+        f"{binascii.hexlify(salt).decode()}"
+        f"${binascii.hexlify(pwd_hash).decode()}"
     )
 
-    st.subheader("💰 MEU CASHBACK")
 
-    st.markdown(
-        """
-        <div style="
-            padding:20px;
-            border-radius:15px;
-            border:1px solid #ddd;
-            margin-bottom:15px;
-        ">
-        <h2>R$ {:.2f}</h2>
+def verify_password(password, stored):
+    try:
+        salt_hex, hash_hex = stored.split("$")
 
-        <div style="
-            background:#eeeeee;
-            border-radius:10px;
-            height:18px;
-            width:100%;
-        ">
-            <div style="
-                background:#21ba45;
-                width:{:.1f}%;
-                height:18px;
-                border-radius:10px;
-            "></div>
-        </div>
+        salt = binascii.unhexlify(salt_hex)
 
-        <p>{:.1f}%</p>
-        <p><b>{:,} / {:,} BIO</b></p>
-
-        </div>
-        """.format(
-            cashback,
-            percentual,
-            percentual,
-            bio_atual,
-            LIMITE_BIO
-        ).replace(",", "."),
-        unsafe_allow_html=True
-    )
-
-    bio_faltante = max(
-        LIMITE_BIO - bio_atual,
-        0
-    )
-
-    if bio_faltante > 0:
-        st.write(
-            "Faltam " +
-            format(bio_faltante, ",").replace(",", ".") +
-            " BIO para chegar a R$50,00."
+        pwd_hash = hashlib.pbkdf2_hmac(
+            "sha256",
+            password.encode(),
+            salt,
+            200000
         )
+
+        return secrets.compare_digest(
+            binascii.hexlify(pwd_hash).decode(),
+            hash_hex
+        )
+
+    except Exception:
+        return False
+
+
+# =========================
+# SUPABASE
+# =========================
+
+def supabase_get(tabela, params=None):
+    url = f"{SUPABASE_URL}/rest/v1/{tabela}"
+
+    resposta = requests.get(
+        url,
+        headers=HEADERS,
+        params=params or {}
+    )
+
+    if resposta.status_code >= 400:
+        st.error(f"Erro Supabase: {resposta.text}")
+        return []
+
+    return resposta.json()
+
+
+def supabase_insert(tabela, dados):
+    url = f"{SUPABASE_URL}/rest/v1/{tabela}"
+
+    headers = HEADERS.copy()
+    headers["Prefer"] = "return=representation"
+
+    resposta = requests.post(
+        url,
+        headers=headers,
+        json=dados
+    )
+
+    if resposta.status_code >= 400:
+        st.error(f"Erro Supabase: {resposta.text}")
+        return []
+
+    return resposta.json()
+
+
+def supabase_update(tabela, dados, params):
+    url = f"{SUPABASE_URL}/rest/v1/{tabela}"
+
+    headers = HEADERS.copy()
+    headers["Prefer"] = "return=representation"
+
+    resposta = requests.patch(
+        url,
+        headers=headers,
+        params=params,
+        json=dados
+    )
+
+    if resposta.status_code >= 400:
+        st.error(f"Erro Supabase: {resposta.text}")
+        return []
+
+    return resposta.json()
+
+
+# =========================
+# STORAGE
+# =========================
+
+def enviar_foto_storage(caminho, arquivo):
+    url = (
+        f"{SUPABASE_URL}/storage/v1/object/"
+        f"{BUCKET}/{caminho}"
+    )
+
+    headers = {
+        "Authorization": f"Bearer {SUPABASE_KEY}",
+        "apikey": SUPABASE_KEY,
+        "Content-Type": arquivo.type
+    }
+
+    resposta = requests.post(
+        url,
+        headers=headers,
+        data=arquivo.getvalue()
+    )
+
+    return resposta
+
+
+def baixar_foto_storage(caminho):
+    url = (
+        f"{SUPABASE_URL}/storage/v1/object/"
+        f"{BUCKET}/{caminho}"
+    )
+
+    headers = {
+        "Authorization": f"Bearer {SUPABASE_KEY}",
+        "apikey": SUPABASE_KEY
+    }
+
+    resposta = requests.get(
+        url,
+        headers=headers
+    )
+
+    if resposta.status_code == 200:
+        return resposta.content
+
+    return None
+
+
+# =========================
+# SESSÃO
+# =========================
+
+if "participante" not in st.session_state:
+    st.session_state.participante = None
+
+if "admin" not in st.session_state:
+    st.session_state.admin = False
+
+
+# =========================
+# LOGO / TÍTULO
+# =========================
+
+st.title("💪 BioCore")
+
+st.write(
+    "Treine, registre suas atividades e acumule BIO."
+)
+
+st.divider()
+
+
+# =========================
+# ADMIN
+# =========================
+
+with st.expander("🔐 Login administrativo"):
+
+    if not st.session_state.admin:
+
+        senha_admin = st.text_input(
+            "Senha administrativa",
+            type="password"
+        )
+
+        if st.button("Entrar como administrador"):
+
+            # Temporariamente usamos a senha antiga.
+            # Depois vamos colocar a senha administrativa
+            # também nos Secrets.
+            if senha_admin == "1234":
+
+                st.session_state.admin = True
+                st.rerun()
+
+            else:
+                st.error("Senha administrativa incorreta.")
+
     else:
-        st.write(
-            "Você atingiu o limite de R$50,00 de cashback. 🎉"
-        )
+
+        st.success("Administrador conectado.")
+
+        if st.button("Sair do administrador"):
+            st.session_state.admin = False
+            st.rerun()
+
+
+# =========================
+# PAINEL ADMIN
+# =========================
+
+if st.session_state.admin:
+
+    st.header("Painel administrativo")
+
+    participantes = supabase_get(
+        "participantes",
+        {
+            "select": "*",
+            "order": "created_at.desc"
+        }
+    )
+
+    st.subheader("Participantes")
+
+    if not participantes:
+        st.info("Nenhum participante cadastrado.")
+
+    else:
+
+        for pessoa in participantes:
+
+            with st.container():
+
+                st.markdown(
+                    f"### {pessoa['nome']}"
+                )
+
+                st.write(
+                    f"📧 {pessoa['email']}"
+                )
+
+                st.write(
+                    f"💰 BIO: {pessoa.get('bio', 0)}"
+                )
+
+                st.write("---")
+
+    st.subheader("📸 Comprovações")
+
+    comprovacoes = supabase_get(
+        "comprovacoes",
+        {
+            "select": "*",
+            "order": "created_at.desc"
+        }
+    )
+
+    if not comprovacoes:
+
+        st.info("Nenhuma comprovação enviada.")
+
+    else:
+
+        for comprovacao in comprovacoes:
+
+            participante_id = comprovacao["participante_id"]
+
+            pessoa = supabase_get(
+                "participantes",
+                {
+                    "select": "nome,email",
+                    "id": f"eq.{participante_id}",
+                    "limit": "1"
+                }
+            )
+
+            nome = (
+                pessoa[0]["nome"]
+                if pessoa
+                else "Participante"
+            )
+
+            st.markdown(
+                f"### 📸 {nome}"
+            )
+
+            st.write(
+                f"Arquivo: {comprovacao['nome_arquivo']}"
+            )
+
+            st.write(
+                f"Status: {comprovacao['status']}"
+            )
+
+            imagem = baixar_foto_storage(
+                comprovacao["arquivo_path"]
+            )
+
+            if imagem:
+                st.image(
+                    imagem,
+                    use_container_width=True
+                )
+
+            if (
+                comprovacao["status"] == "Pendente"
+                and not comprovacao["bio_pago"]
+            ):
+
+                if st.button(
+                    "✅ Aprovar +70 BIO",
+                    key=f"aprovar_{comprovacao['id']}"
+                ):
+
+                    participante = supabase_get(
+                        "participantes",
+                        {
+                            "select": "bio",
+                            "id": f"eq.{participante_id}",
+                            "limit": "1"
+                        }
+                    )
+
+                    if participante:
+
+                        bio_atual = participante[0].get(
+                            "bio", 0
+                        ) or 0
+
+                        novo_bio = bio_atual + BIO_FOTO
+
+                        supabase_update(
+                            "participantes",
+                            {"bio": novo_bio},
+                            {
+                                "id": f"eq.{participante_id}"
+                            }
+                        )
+
+                        supabase_update(
+                            "comprovacoes",
+                            {
+                                "status": "Aprovada",
+                                "bio_pago": True
+                            },
+                            {
+                                "id": f"eq.{comprovacao['id']}"
+                            }
+                        )
+
+                        st.success(
+                            "Comprovação aprovada e +70 BIO adicionados."
+                        )
+
+                        st.rerun()
+
+            st.divider()
+
+    st.stop()
+
+
+# =========================
+# PARTICIPANTE LOGADO
+# =========================
+
+if st.session_state.participante:
+
+    participante = st.session_state.participante
+
+    # Atualiza dados do banco
+    dados = supabase_get(
+        "participantes",
+        {
+            "select": "*",
+            "id": f"eq.{participante['id']}",
+            "limit": "1"
+        }
+    )
+
+    if dados:
+        participante = dados[0]
+        st.session_state.participante = participante
+
+    st.header(
+        f"Olá, {participante['nome']}! 👋"
+    )
+
+    bio_atual = participante.get("bio", 0) or 0
+
+    st.metric(
+        "💰 Meu saldo BIO",
+        f"{bio_atual:,}".replace(",", ".")
+    )
+
+    st.write(
+        f"Cashback disponível ao atingir "
+        f"{LIMITE_BIO:,} BIO: até R$ 50,00"
+    )
 
     st.divider()
 
     # =========================
-    # TREINO
+    # REGISTRAR TREINO
     # =========================
 
-    st.subheader("🏋️ Treino / Atividade Física")
-
-    st.write("O que você treinou hoje?")
-
-    atividades = [
-        "Peito, ombro e tríceps",
-        "Costas e bíceps",
-        "Quadríceps, glúteos e panturrilhas",
-        "Perna completo",
-        "Abdômen",
-        "Peso corporal",
-        "Corrida",
-        "Futebol"
-    ]
+    st.subheader("🏋️ Registrar atividade")
 
     atividade = st.selectbox(
-        "Escolha uma atividade",
-        atividades
+        "Escolha a atividade",
+        [
+            "Peito / Ombro / Tríceps",
+            "Dorsal / Bíceps",
+            "Quadríceps / Glúteo / Panturrilha",
+            "Perna completa",
+            "Abdômen",
+            "Peso corporal",
+            "Corrida",
+            "Futebol"
+        ]
     )
 
-    if st.button("Registrar treino +10 BIO"):
+    if st.button("Registrar treino"):
 
-        if "treinos_lista" not in pessoa:
-            pessoa["treinos_lista"] = []
-
-        pessoa["treinos_lista"].append(
+        supabase_insert(
+            "treinos",
             {
+                "participante_id": participante["id"],
                 "atividade": atividade,
                 "status": "Registrado"
             }
         )
 
-        pessoa["bio"] += BIO_TREINO
+        novo_bio = bio_atual + BIO_TREINO
+
+        supabase_update(
+            "participantes",
+            {"bio": novo_bio},
+            {
+                "id": f"eq.{participante['id']}"
+            }
+        )
+
+        st.session_state.participante["bio"] = novo_bio
 
         st.success(
-            "Treino registrado! +10 BIO 🧬"
+            f"Treino registrado! +{BIO_TREINO} BIO"
         )
 
         st.rerun()
-
-    st.write(
-        "Total de treinos registrados: " +
-        str(
-            len(
-                pessoa.get(
-                    "treinos_lista",
-                    []
-                )
-            )
-        )
-    )
-
-    st.divider()
-
-    # =========================
-    # HISTÓRICO
-    # =========================
-
-    if len(pessoa.get("treinos_lista", [])) > 0:
-
-        st.subheader("📋 Histórico de treinos")
-
-        for numero, treino in enumerate(
-            reversed(pessoa["treinos_lista"]),
-            1
-        ):
-
-            st.write(
-                str(numero) +
-                ". " +
-                treino["atividade"] +
-                " — " +
-                treino["status"]
-            )
 
     st.divider()
 
@@ -214,79 +488,104 @@ if st.session_state.usuario_logado is not None:
     # FOTO SEMANAL
     # =========================
 
-    st.subheader("📸 Foto semanal")
+    st.subheader("📸 Comprovação semanal")
 
     st.write(
-        "Envie uma foto comprovando sua atividade. "
-        "A foto ficará pendente até a análise do administrador."
+        "Envie uma foto do seu treino. "
+        "Após aprovação administrativa, você recebe +70 BIO."
     )
 
-    foto = st.file_uploader(
-        "Enviar foto",
-        type=["jpg", "jpeg", "png"],
-        key="foto_participante"
+    agora = datetime.now(timezone.utc)
+
+    ultima = supabase_get(
+        "comprovacoes",
+        {
+            "select": "created_at",
+            "participante_id": f"eq.{participante['id']}",
+            "order": "created_at.desc",
+            "limit": "1"
+        }
     )
 
-    if foto is not None:
+    pode_enviar = True
 
-        if st.button("Enviar foto para análise"):
+    if ultima:
 
-            if "comprovacoes" not in pessoa:
-                pessoa["comprovacoes"] = []
-
-            pessoa["comprovacoes"].append(
-                {
-                    "nome_arquivo": foto.name,
-                    "arquivo": foto.getvalue(),
-                    "tipo": foto.type,
-                    "status": "Pendente",
-                    "bio_pago": False
-                }
+        try:
+            data_ultima = datetime.fromisoformat(
+                ultima[0]["created_at"].replace(
+                    "Z", "+00:00"
+                )
             )
 
-            st.success(
-                "Foto enviada! Aguarde a aprovação do administrador. 🟡"
+            if agora - data_ultima < timedelta(days=7):
+                pode_enviar = False
+
+        except Exception:
+            pass
+
+    if not pode_enviar:
+
+        st.info(
+            "Você já enviou uma comprovação nos últimos 7 dias."
+        )
+
+    else:
+
+        foto = st.file_uploader(
+            "Escolha a foto",
+            type=["jpg", "jpeg", "png"]
+        )
+
+        if foto:
+
+            st.image(
+                foto,
+                caption="Foto selecionada",
+                use_container_width=True
             )
 
-            st.rerun()
+            if st.button("Enviar comprovação"):
 
-    # =========================
-    # STATUS DAS FOTOS
-    # =========================
+                nome_original = foto.name
 
-    if len(pessoa.get("comprovacoes", [])) > 0:
+                caminho = (
+                    f"{participante['id']}/"
+                    f"{int(datetime.now().timestamp())}_"
+                    f"{nome_original}"
+                )
 
-        st.subheader("📷 Status das minhas fotos")
+                resposta = enviar_foto_storage(
+                    caminho,
+                    foto
+                )
 
-        for numero, comprovacao in enumerate(
-            reversed(pessoa["comprovacoes"]),
-            1
-        ):
+                if resposta.status_code in [200, 201]:
 
-            status = comprovacao["status"]
+                    supabase_insert(
+                        "comprovacoes",
+                        {
+                            "participante_id": participante["id"],
+                            "nome_arquivo": nome_original,
+                            "arquivo_path": caminho,
+                            "tipo": foto.type,
+                            "status": "Pendente",
+                            "bio_pago": False
+                        }
+                    )
 
-            if status == "Pendente":
-                icone = "🟡"
+                    st.success(
+                        "Comprovação enviada! "
+                        "Aguarde a aprovação."
+                    )
 
-            elif status == "Aprovado":
-                icone = "🟢"
+                    st.rerun()
 
-            else:
-                icone = "🔴"
+                else:
 
-            st.write(
-                icone +
-                " " +
-                comprovacao["nome_arquivo"] +
-                " — " +
-                status
-            )
-
-            if status == "Aprovado":
-                st.caption("+70 BIO")
-
-            elif status == "Reprovado":
-                st.caption("0 BIO")
+                    st.error(
+                        "Não foi possível enviar a foto."
+                    )
 
     st.divider()
 
@@ -296,26 +595,24 @@ if st.session_state.usuario_logado is not None:
 
     st.subheader("👛 Minha Trust Wallet")
 
-    st.write(
-        "A carteira é opcional. Você pode cadastrar agora "
-        "ou adicionar depois."
-    )
-
-    carteira_atual = st.text_input(
-        "Endereço da Trust Wallet",
-        value=pessoa.get("wallet", ""),
-        placeholder="0x..."
+    wallet = st.text_input(
+        "Endereço da carteira",
+        value=participante.get("wallet", "")
     )
 
     if st.button("Salvar carteira"):
 
-        pessoa["wallet"] = carteira_atual.strip()
-
-        st.success(
-            "Carteira salva com sucesso."
+        supabase_update(
+            "participantes",
+            {"wallet": wallet},
+            {
+                "id": f"eq.{participante['id']}"
+            }
         )
 
-        st.rerun()
+        st.session_state.participante["wallet"] = wallet
+
+        st.success("Carteira salva.")
 
     st.divider()
 
@@ -323,211 +620,144 @@ if st.session_state.usuario_logado is not None:
     # CASHBACK
     # =========================
 
-    st.subheader("💵 Solicitar cashback")
+    st.subheader("💵 Cashback")
 
     if bio_atual >= LIMITE_BIO:
 
-        st.write(
-            "Cashback disponível: R$50,00"
+        st.success(
+            "Você atingiu 5.000 BIO."
         )
 
-        if pessoa.get(
-            "cashback_solicitado",
-            False
+        st.write(
+            "Valor máximo disponível neste ciclo: R$ 50,00."
+        )
+
+        if not participante.get(
+            "cashback_solicitado", False
         ):
 
-            if pessoa.get(
-                "cashback_pago",
-                False
-            ):
+            if st.button("Solicitar cashback"):
 
-                st.success(
-                    "Cashback marcado como pago pelo administrador. ✅"
+                supabase_update(
+                    "participantes",
+                    {
+                        "cashback_solicitado": True
+                    },
+                    {
+                        "id": f"eq.{participante['id']}"
+                    }
                 )
 
-            else:
-
-                st.info(
-                    "Seu cashback já foi solicitado e está aguardando pagamento."
-                )
-
-        else:
-
-            if st.button(
-                "Solicitar cashback de R$50,00"
-            ):
-
-                pessoa["cashback_solicitado"] = True
-                pessoa["cashback_pago"] = False
-
                 st.success(
-                    "Solicitação enviada para análise do BioCore."
+                    "Solicitação enviada ao administrador."
                 )
 
                 st.rerun()
 
+        else:
+
+            st.info(
+                "Seu cashback já foi solicitado."
+            )
+
     else:
 
+        faltam = LIMITE_BIO - bio_atual
+
         st.info(
-            "Você precisa acumular 5.000 BIO para solicitar "
-            "o cashback máximo de R$50,00."
+            f"Faltam {faltam:,} BIO para atingir 5.000."
+            .replace(",", ".")
         )
 
     st.divider()
 
     # =========================
-    # MERCADO LIVRE
+    # LINKS
     # =========================
 
-    st.subheader("🛒 Mercado Livre")
+    st.subheader("🛍️ Parceiros")
 
-    st.write(
-        "Faça suas compras pelo link de afiliado BioCore."
+    st.link_button(
+        "🛒 Mercado Livre",
+        "https://www.mercadolivre.com.br/social/sama6231844"
     )
 
     st.link_button(
-        "🛒 Comprar no Mercado Livre",
-        MERCADO_LIVRE_LINK
-    )
-
-    st.write(
-        "25% da comissão gerada pela compra é destinada "
-        "ao participante em BIO."
+        "🏪 CoreStryke",
+        "https://corestryke.com"
     )
 
     st.divider()
 
-    # =========================
-    # CORESTRYKE
-    # =========================
+    if st.button("Sair"):
 
-    st.subheader("🏪 CoreStryke")
+        st.session_state.participante = None
+        st.rerun()
 
-    st.write(
-        "Os BIO acumulados podem ser utilizados para obter "
-        "descontos nas compras da CoreStryke."
+    st.stop()
+
+
+# =========================
+# TELA DE LOGIN / CADASTRO
+# =========================
+
+aba = st.radio(
+    "Escolha uma opção",
+    [
+        "Entrar",
+        "Criar cadastro"
+    ],
+    horizontal=True
+)
+
+
+# =========================
+# LOGIN
+# =========================
+
+if aba == "Entrar":
+
+    st.subheader("🔑 Entrar")
+
+    email = st.text_input("E-mail")
+
+    senha = st.text_input(
+        "Senha",
+        type="password"
     )
 
-    st.write(
-        "O desconto é calculado de acordo com a quantidade "
-        "de BIO disponível, conforme a tabela de conversão do BioCore."
-    )
+    if st.button("Entrar"):
 
-    st.write(
-        "Os BIO utilizados em uma compra são descontados "
-        "do saldo do participante."
-    )
+        if not email or not senha:
 
-    st.write(
-        "BIO utilizado em desconto na CoreStryke deixa de "
-        "contar para o cashback."
-    )
+            st.warning(
+                "Preencha e-mail e senha."
+            )
 
-    st.write(
-        "O mesmo BIO não pode ser utilizado duas vezes: "
-        "ou é usado como desconto na CoreStryke, ou permanece "
-        "disponível para o cashback."
-    )
+        else:
 
-    st.link_button(
-        "🏪 Acessar CoreStryke",
-        CORESTRYKE_LINK
-    )
+            resultado = supabase_get(
+                "participantes",
+                {
+                    "select": "*",
+                    "email": f"eq.{email.strip().lower()}",
+                    "limit": "1"
+                }
+            )
 
-    st.divider()
+            if resultado:
 
-    # =========================
-    # REGRAS
-    # =========================
+                pessoa = resultado[0]
 
-    st.subheader("📜 Regras do BioCore")
+                if verify_password(
+                    senha,
+                    pessoa["senha_hash"]
+                ):
 
-    st.markdown(
-        """
-### 🏋️ Treinos e atividades
-
-- Cada treino/atividade física registrado vale **+10 BIO**.
-- Deve ser registrado um treino por vez.
-
-### 📸 Foto semanal
-
-- Envie uma foto comprovando sua atividade.
-- A foto fica **Pendente** até a análise do administrador.
-- Foto **Aprovada**: +70 BIO.
-- Foto **Reprovada**: 0 BIO.
-- Limite de **1 foto por semana**.
-
-### 🛒 Mercado Livre
-
-- Faça suas compras através do link de afiliado BioCore.
-- **25% da comissão gerada pela compra é revertida ao participante em BIO**.
-- O valor recebido depende da comissão efetivamente gerada pela compra.
-
-### 🏪 CoreStryke
-
-- Os BIO acumulados podem ser utilizados para obter descontos nas compras da CoreStryke.
-- Os BIO utilizados em uma compra são descontados do saldo do participante.
-- BIO utilizado em desconto na CoreStryke deixa de contar para o cashback.
-
-### 💰 Cashback
-
-- **1 BIO = R$ 0,01** para fins de cálculo do cashback.
-- O limite para conversão é de **5.000 BIO = R$ 50,00**.
-- O cashback está sujeito à análise e aprovação do BioCore.
-"""
-    )
-
-
-# ============================================================
-# LOGIN / CADASTRO / ADMIN
-# ============================================================
-
-else:
-
-    aba_login, aba_cadastro, aba_admin = st.tabs(
-        [
-            "🔐 Login",
-            "📝 Cadastro",
-            "🛡️ Administrador"
-        ]
-    )
-
-    # =========================
-    # LOGIN
-    # =========================
-
-    with aba_login:
-
-        st.subheader("🔐 Login")
-
-        email_login = st.text_input(
-            "E-mail",
-            key="login_email"
-        )
-
-        senha_login = st.text_input(
-            "Senha",
-            type="password",
-            key="login_senha"
-        )
-
-        if st.button(
-            "Entrar",
-            key="botao_login"
-        ):
-
-            email_login = email_login.strip().lower()
-
-            if email_login in st.session_state.usuarios:
-
-                pessoa = st.session_state.usuarios[email_login]
-
-                if pessoa["senha"] == senha_login:
-
-                    st.session_state.usuario_logado = email_login
+                    st.session_state.participante = pessoa
 
                     st.success(
-                        "Login realizado com sucesso!"
+                        "Login realizado!"
                     )
 
                     st.rerun()
@@ -535,330 +765,96 @@ else:
                 else:
 
                     st.error(
-                        "Senha incorreta."
+                        "E-mail ou senha incorretos."
                     )
 
             else:
 
                 st.error(
-                    "E-mail não cadastrado."
-                )
-
-    # =========================
-    # CADASTRO
-    # =========================
-
-    with aba_cadastro:
-
-        st.subheader("📝 Cadastro")
-
-        nome = st.text_input(
-            "Nome"
-        )
-
-        email = st.text_input(
-            "E-mail",
-            key="cadastro_email"
-        )
-
-        senha = st.text_input(
-            "Senha",
-            type="password",
-            key="cadastro_senha"
-        )
-
-        confirmar_senha = st.text_input(
-            "Confirmar senha",
-            type="password",
-            key="confirmar_senha"
-        )
-
-        wallet = st.text_input(
-            "Trust Wallet (opcional)",
-            placeholder="0x..."
-        )
-
-        if st.button(
-            "Criar cadastro",
-            key="botao_cadastro"
-        ):
-
-            email_novo = email.strip().lower()
-
-            if nome.strip() == "":
-                st.error("Digite seu nome.")
-
-            elif email_novo == "":
-                st.error("Digite seu e-mail.")
-
-            elif senha == "":
-                st.error("Digite uma senha.")
-
-            elif senha != confirmar_senha:
-                st.error("As senhas não são iguais.")
-
-            elif email_novo in st.session_state.usuarios:
-                st.error("Este e-mail já está cadastrado.")
-
-            else:
-
-                st.session_state.usuarios[email_novo] = {
-                    "nome": nome.strip(),
-                    "email": email_novo,
-                    "senha": senha,
-                    "wallet": wallet.strip(),
-                    "bio": 0,
-                    "treinos_lista": [],
-                    "comprovacoes": [],
-                    "cashback_solicitado": False,
-                    "cashback_pago": False
-                }
-
-                st.success(
-                    "Cadastro realizado com sucesso! "
-                    "Agora você pode entrar pela aba Login."
-                )
-
-    # =========================
-    # ADMINISTRADOR
-    # =========================
-
-    with aba_admin:
-
-        st.subheader("🛡️ Administrador")
-
-        senha_admin = st.text_input(
-            "Senha do administrador",
-            type="password",
-            key="senha_admin"
-        )
-
-        if st.button(
-            "Entrar como administrador",
-            key="botao_admin"
-        ):
-
-            if senha_admin == SENHA_ADMIN:
-
-                st.session_state.admin_logado = True
-
-                st.success(
-                    "Acesso administrativo liberado."
-                )
-
-                st.rerun()
-
-            else:
-
-                st.error(
-                    "Senha de administrador incorreta."
+                    "E-mail ou senha incorretos."
                 )
 
 
-# ============================================================
-# PAINEL ADMINISTRATIVO
-# ============================================================
+# =========================
+# CADASTRO
+# =========================
 
-if st.session_state.admin_logado:
+else:
 
-    st.divider()
+    st.subheader("📝 Criar cadastro")
 
-    st.header("🛡️ Painel Administrativo")
+    nome = st.text_input("Nome")
 
-    if st.button(
-        "🚪 Sair do administrador",
-        key="sair_admin"
-    ):
-
-        st.session_state.admin_logado = False
-        st.rerun()
-
-    usuarios = st.session_state.usuarios
-
-    st.write(
-        "Total de participantes: " +
-        str(len(usuarios))
+    email = st.text_input(
+        "E-mail",
+        key="cadastro_email"
     )
 
-    st.divider()
+    senha = st.text_input(
+        "Senha",
+        type="password",
+        key="cadastro_senha"
+    )
 
-    if len(usuarios) == 0:
+    confirmar = st.text_input(
+        "Confirmar senha",
+        type="password"
+    )
 
-        st.info(
-            "Ainda não existem participantes cadastrados."
-        )
+    if st.button("Criar cadastro"):
 
-    else:
+        if not nome or not email or not senha:
 
-        for email_participante, pessoa in usuarios.items():
-
-            st.subheader(
-                "👤 " +
-                pessoa["nome"]
+            st.warning(
+                "Preencha todos os campos."
             )
 
-            st.write(
-                "📧 E-mail: " +
-                pessoa["email"]
+        elif senha != confirmar:
+
+            st.error(
+                "As senhas não são iguais."
             )
 
-            st.write(
-                "🧬 BIO: " +
-                str(pessoa["bio"])
+        else:
+
+            email_limpo = email.strip().lower()
+
+            existente = supabase_get(
+                "participantes",
+                {
+                    "select": "id",
+                    "email": f"eq.{email_limpo}",
+                    "limit": "1"
+                }
             )
 
-            st.write(
-                "🏋️ Treinos registrados: " +
-                str(
-                    len(
-                        pessoa.get(
-                            "treinos_lista",
-                            []
-                        )
-                    )
-                )
-            )
+            if existente:
 
-            st.write(
-                "📸 Comprovações: " +
-                str(
-                    len(
-                        pessoa.get(
-                            "comprovacoes",
-                            []
-                        )
-                    )
-                )
-            )
-
-            wallet_admin = pessoa.get(
-                "wallet",
-                ""
-            )
-
-            if wallet_admin:
-
-                st.write(
-                    "👛 Trust Wallet: " +
-                    wallet_admin
+                st.error(
+                    "Este e-mail já está cadastrado."
                 )
 
             else:
 
-                st.write(
-                    "👛 Trust Wallet: não cadastrada"
+                novo = supabase_insert(
+                    "participantes",
+                    {
+                        "nome": nome.strip(),
+                        "email": email_limpo,
+                        "senha_hash": hash_password(senha),
+                        "wallet": "",
+                        "bio": 0,
+                        "cashback_solicitado": False,
+                        "cashback_pago": False
+                    }
                 )
 
-            cashback_admin = min(
-                pessoa["bio"] * VALOR_BIO,
-                50
-            )
+                if novo:
 
-            st.write(
-                "💰 Cashback calculado: R$ " +
-                format(
-                    cashback_admin,
-                    ".2f"
-                )
-            )
-
-            # =========================
-            # HISTÓRICO
-            # =========================
-
-            with st.expander(
-                "🏋️ Ver histórico de treinos"
-            ):
-
-                treinos_admin = pessoa.get(
-                    "treinos_lista",
-                    []
-                )
-
-                if len(treinos_admin) == 0:
-
-                    st.write(
-                        "Nenhum treino registrado."
+                    st.success(
+                        "Cadastro criado com sucesso!"
                     )
 
-                else:
-
-                    for treino in treinos_admin:
-
-                        st.write(
-                            "• " +
-                            treino["atividade"] +
-                            " — " +
-                            treino["status"]
-                        )
-
-            # =========================
-            # COMPROVAÇÕES
-            # =========================
-
-            with st.expander(
-                "📸 Ver fotos e aprovar/reprovar"
-            ):
-
-                comprovacoes_admin = pessoa.get(
-                    "comprovacoes",
-                    []
-                )
-
-                if len(comprovacoes_admin) == 0:
-
-                    st.write(
-                        "Nenhuma foto enviada."
+                    st.info(
+                        "Agora vá em 'Entrar' para acessar."
                     )
-
-                else:
-
-                    for indice, comprovacao in enumerate(
-                        comprovacoes_admin
-                    ):
-
-                        st.write(
-                            "📷 " +
-                            comprovacao["nome_arquivo"]
-                        )
-
-                        st.write(
-                            "Status: " +
-                            comprovacao["status"]
-                        )
-
-                        # =========================
-                        # MOSTRAR FOTO
-                        # =========================
-
-                        if "arquivo" in comprovacao:
-
-                            st.image(
-                                comprovacao["arquivo"],
-                                caption=comprovacao["nome_arquivo"],
-                                width=300
-                            )
-
-                        # =========================
-                        # APROVAR / REPROVAR
-                        # =========================
-
-                        if comprovacao["status"] == "Pendente":
-
-                            coluna1, coluna2 = st.columns(2)
-
-                            with coluna1:
-
-                                if st.button(
-                                    "🟢 Aprovar",
-                                    key="aprovar_" + email_participante + "_" + str(indice)
-                                ):
-
-                                    comprovacao["status"] = "Aprovado"
-
-                                    if not comprovacao.get(
-                                        "bio_pago",
-                                        False
-                                    ):
-
-                                        pessoa["bio"] += B
