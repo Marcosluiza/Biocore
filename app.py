@@ -1176,7 +1176,7 @@ def mostrar_links():
     st.markdown(
     '<a href="https://www.mercadolivre.com.br/social/sama6231844" target="_blank">🛒 Mercado Livre</a>',
     unsafe_allow_html=True
-)
+
     )
 
     st.caption(
