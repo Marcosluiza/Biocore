@@ -1173,11 +1173,13 @@ def mostrar_cashback(participante, bio):
 def mostrar_links():
     st.subheader("🔗 Acessos")
 
-    st.markdown(
-    '<a href="https://www.mercadolivre.com.br/social/sama6231844" target="_blank">🛒 Mercado Livre</a>',
-    unsafe_allow_html=True
+    st.link_button(
+    "🛒 Mercado Livre",
+    "https://www.mercadolivre.com.br/social/sama6231844"
+)
 
-    )
+
+    
 
     st.caption(
         "Link de afiliado do Mercado Livre."
