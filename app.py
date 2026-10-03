@@ -1175,7 +1175,7 @@ def mostrar_links():
 
     st.link_button(
         "🛒 Mercado Livre",
-        "https://www.mercadolivre.com.br/",
+        "https://www.mercadolivre.com.br/social/sama6231844",
     )
 
     st.caption(
