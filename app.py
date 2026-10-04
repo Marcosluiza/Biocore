@@ -1329,6 +1329,10 @@ def mostrar_participante():
         participante
     )
 
+    mostrar_chave_pix(
+        participante
+    )
+
     mostrar_cashback(
         participante,
         bio
