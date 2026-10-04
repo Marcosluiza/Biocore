@@ -1068,45 +1068,53 @@ def enviar_bioimpedancia(participante_id):
 # PARTICIPANTE — WALLET
 # =========================================================
 
-def mostrar_wallet(participante):
-    st.subheader("👛 Minha Trust Wallet")
+
+# =========================================================
+# PARTICIPANTE — CHAVE PIX
+# =========================================================
+
+def mostrar_chave_pix(participante):
+    st.subheader("💳 Minha chave Pix")
 
     participante_id = participante["id"]
 
-    wallet_atual = (
-        participante.get("wallet", "")
+    chave_pix_atual = (
+        participante.get("chave_pix", "")
         or ""
     )
 
-    wallet = st.text_input(
-        "Endereço da carteira",
-        value=wallet_atual,
-        placeholder=(
-            "Cole aqui o endereço da sua carteira"
-        ),
+    chave_pix = st.text_input(
+        "Chave Pix",
+        value=chave_pix_atual,
+        placeholder="Digite sua chave Pix",
+        key=f"chave_pix_{participante_id}",
     )
 
     if st.button(
-        "Salvar carteira"
+        "Salvar chave Pix",
+        key=f"salvar_pix_{participante_id}",
     ):
-        supabase_update(
+        chave_pix = chave_pix.strip()
+
+        if not chave_pix:
+            st.error("Digite sua chave Pix.")
+            return
+
+        resultado = supabase_update(
             "participantes",
             {
                 "id":
                 f"eq.{participante_id}",
             },
             {
-                "wallet":
-                wallet.strip(),
+                "chave_pix":
+                chave_pix,
             },
         )
 
-        st.success(
-            "Carteira salva."
-        )
-
-        st.rerun()
-
+        if resultado is not None:
+            st.success("Chave Pix salva com sucesso.")
+            st.rerun()
 
 # =========================================================
 # PARTICIPANTE — CASHBACK
