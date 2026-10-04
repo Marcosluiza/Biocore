@@ -1113,16 +1113,40 @@ def mostrar_wallet(participante):
 # =========================================================
 
 def mostrar_cashback(participante, bio):
-    st.subheader("💵 Cashback")
+    st.subheader("💶 MEU CASHBACK")
 
-    st.write(
-        "5.000 BIO permitem solicitar até R$50 de cashback, "
-        "conforme as regras do ciclo."
+    # Limite do ciclo
+    bio_meta = 5000
+    cashback_maximo = 50.00
+
+    # Garante que o BIO não ultrapasse a meta para o cálculo visual
+    bio_progresso = min(max(bio, 0), bio_meta)
+
+    # Calcula o cashback proporcional ao BIO acumulado
+    cashback = (bio_progresso / bio_meta) * cashback_maximo
+
+    # Percentual da barra
+    progresso = bio_progresso / bio_meta
+
+    st.metric(
+        "Cashback acumulado",
+        f"R$ {cashback:.2f}"
     )
 
-    if bio >= 5000:
+    st.progress(progresso)
+
+    st.write(
+        f"**{bio_progresso:,.0f} / {bio_meta:,.0f} BIO**"
+        .replace(",", ".")
+    )
+
+    st.write(
+        f"**R$ {cashback:.2f} / R$ {cashback_maximo:.2f}**"
+    )
+
+    if bio >= bio_meta:
         st.success(
-            "Você atingiu 5.000 BIO."
+            "🎉 Você atingiu 5.000 BIO e pode solicitar até R$50 de cashback."
         )
 
         if participante.get(
@@ -1135,7 +1159,7 @@ def mostrar_cashback(participante, bio):
 
         else:
             if st.button(
-                "Solicitar cashback de até R$50"
+                "💶 Solicitar cashback de até R$50"
             ):
                 supabase_update(
                     "participantes",
@@ -1158,10 +1182,10 @@ def mostrar_cashback(participante, bio):
                 st.rerun()
 
     else:
-        faltam = 5000 - bio
+        faltam = bio_meta - bio
 
         st.info(
-            f"Faltam {faltam:,} BIO."
+            f"Faltam {faltam:,} BIO para atingir R$50 de cashback."
             .replace(",", ".")
         )
 
