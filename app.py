@@ -1,4 +1,4 @@
-import binascii
+9import binascii
 import hashlib
 import secrets
 from datetime import datetime, timedelta, timezone
@@ -1058,10 +1058,10 @@ def enviar_bioimpedancia(participante_id):
             )
 
             if resultado:
-                st.success(
-                    "Comprovante enviado para análise."
-                        key=f"chave_pix_{participante_id}",)
-                st.rerun()
+    st.success(
+        "Comprovante enviado para análise."
+    )
+    st.rerun()
                 
 # =========================================================
 # PARTICIPANTE — WALLET
