@@ -1058,10 +1058,10 @@ def enviar_bioimpedancia(participante_id):
             )
 
             if resultado:
-    st.success(
+                st.success(
         "Comprovante enviado para análise."
     )
-    st.rerun()
+                st.rerun()
                 
 # =========================================================
 # PARTICIPANTE — WALLET
