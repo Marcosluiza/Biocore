@@ -1152,54 +1152,7 @@ def mostrar_chave_pix(participante):
         if resultado is not None:
             st.success("Chave Pix salva com sucesso.")
             st.rerun()
-
-# =========================================================
-# PARTICIPANTE — CHAVE PIX
-# =========================================================
-
-def mostrar_chave_pix(participante):
-    st.subheader("💳 Minha chave Pix")
-
-    participante_id = participante["id"]
-
-    chave_pix_atual = (
-        participante.get("chave_pix", "")
-        or ""
-    )
-
-    chave_pix = st.text_input(
-        "Chave Pix",
-        value=chave_pix_atual,
-        placeholder="Digite sua chave Pix",
-
-    )
-
-    if st.button(
-        "Salvar chave Pix",
-        key=f"salvar_pix_{participante_id}",
-    ):
-        chave_pix = chave_pix.strip()
-
-        if not chave_pix:
-            st.error("Digite sua chave Pix.")
-            return
-
-        resultado = supabase_update(
-            "participantes",
-            {
-                "id":
-                f"eq.{participante_id}",
-            },
-            {
-                "chave_pix":
-                chave_pix,
-            },
-        )
-
-        if resultado is not None:
-            st.success("Chave Pix salva com sucesso.")
-            st.rerun()
-
+            
 # =========================================================
 # PARTICIPANTE — CASHBACK
 # =========================================================
