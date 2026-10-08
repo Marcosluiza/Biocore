@@ -1342,6 +1342,137 @@ def mostrar_participante():
 
 
 # =========================================================
+# JOGO — PÊNALTI
+# =========================================================
+
+def jogo_penalti(participante_id):
+    st.subheader("⚽ Pênalti BioCore")
+
+    if "penaltis" not in st.session_state:
+        st.session_state.penaltis = 0
+
+    if "gols_penalti" not in st.session_state:
+        st.session_state.gols_penalti = 0
+
+    if "bio_penalti" not in st.session_state:
+        st.session_state.bio_penalti = 0
+
+    st.write(
+        f"🥅 Gols: {st.session_state.gols_penalti} "
+        f"| ⚽ Cobranças: {st.session_state.penaltis} "
+        f"| 🪙 BIO: +{st.session_state.bio_penalti}"
+    )
+
+    st.markdown(
+        """
+        <div style="
+            background:#16803b;
+            height:300px;
+            border:4px solid white;
+            border-radius:15px;
+            position:relative;
+            margin-bottom:20px;
+        ">
+
+            <!-- GOL -->
+            <div style="
+                position:absolute;
+                top:20px;
+                left:15%;
+                width:70%;
+                height:130px;
+                border:6px solid white;
+            ">
+
+                <div style="
+                    position:absolute;
+                    top:45px;
+                    left:50%;
+                    transform:translateX(-50%);
+                    font-size:55px;
+                ">
+                    🧤
+                </div>
+
+            </div>
+
+            <!-- BOLA -->
+            <div style="
+                position:absolute;
+                bottom:35px;
+                left:50%;
+                transform:translateX(-50%);
+                font-size:35px;
+            ">
+                ⚽
+            </div>
+
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.write("### Escolha o canto:")
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        esquerda = st.button(
+            "⬅️ Esquerda",
+            use_container_width=True
+        )
+
+    with col2:
+        centro = st.button(
+            "⬆️ Centro",
+            use_container_width=True
+        )
+
+    with col3:
+        direita = st.button(
+            "➡️ Direita",
+            use_container_width=True
+        )
+
+    if esquerda or centro or direita:
+
+        st.session_state.penaltis += 1
+
+        direcao_goleiro = secrets.choice(
+            ["esquerda", "centro", "direita"]
+        )
+
+        if esquerda:
+            chute = "esquerda"
+        elif centro:
+            chute = "centro"
+        else:
+            chute = "direita"
+
+        if chute == direcao_goleiro:
+
+            st.error("🧤 DEFENDEU!")
+
+        else:
+
+            st.session_state.gols_penalti += 1
+            st.session_state.bio_penalti += 1
+
+            st.success("⚽ GOOOOOL! +1 BIO")
+
+        st.rerun()
+
+    if st.button(
+        "🔄 Zerar jogo",
+        use_container_width=True
+    ):
+
+        st.session_state.penaltis = 0
+        st.session_state.gols_penalti = 0
+        st.session_state.bio_penalti = 0
+
+        st.rerun()
+# =========================================================
 # LOGIN DO PARTICIPANTE
 # =========================================================
 
