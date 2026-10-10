@@ -1716,6 +1716,211 @@ def mostrar_login_cadastro():
         cadastro_participante()
 
 
+
+def mostrar_jogo_supino():
+    import streamlit.components.v1 as components
+
+    st.header("🏋️ BioCore Supino")
+    st.caption("Complete 4 séries de 10 repetições.")
+
+    components.html(
+        """
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1">
+        <style>
+          body {
+            margin: 0;
+            background: #17151f;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+          }
+          .game {
+            padding: 12px;
+            border-radius: 16px;
+            background: #242131;
+          }
+          .gym {
+            height: 230px;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(#353047, #17151f);
+            border-radius: 12px;
+          }
+          .bench {
+            position: absolute;
+            left: 15%;
+            right: 15%;
+            bottom: 43px;
+            height: 18px;
+            background: #a1a1aa;
+            border-radius: 8px;
+          }
+          .body {
+            position: absolute;
+            left: 28%;
+            bottom: 65px;
+            width: 44%;
+            height: 28px;
+            background: #c084fc;
+            border-radius: 20px;
+          }
+          .head {
+            position: absolute;
+            left: 19%;
+            bottom: 68px;
+            width: 30px;
+            height: 30px;
+            background: #f1c6a8;
+            border-radius: 50%;
+          }
+          .bar {
+            position: absolute;
+            left: 12%;
+            width: 76%;
+            height: 9px;
+            background: #e5e7eb;
+            border-radius: 6px;
+            top: 65px;
+            transition: top .35s ease;
+          }
+          .plate {
+            position: absolute;
+            top: -13px;
+            width: 15px;
+            height: 35px;
+            background: #e879f9;
+            border: 3px solid #c026d3;
+            border-radius: 4px;
+          }
+          .left { left: 8%; }
+          .right { right: 8%; }
+          .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+          }
+          .number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e879f9;
+          }
+          button {
+            width: 47%;
+            padding: 15px 5px;
+            margin: 3px 1%;
+            border: 0;
+            border-radius: 12px;
+            background: #c026d3;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            touch-action: manipulation;
+          }
+          button:disabled { opacity: .35; }
+          .start { width: 96%; background: #7e22ce; }
+          .message { min-height: 24px; color: #ddd6fe; }
+        </style>
+        </head>
+        <body>
+        <div class="game">
+          <div class="gym">
+            <div class="bench"></div>
+            <div class="body"></div>
+            <div class="head"></div>
+            <div class="bar" id="bar">
+              <span class="plate left"></span>
+              <span class="plate right"></span>
+            </div>
+          </div>
+          <div class="stats">
+            <div>SÉRIE<br><span class="number" id="series">0/4</span></div>
+            <div>REPETIÇÕES<br><span class="number" id="reps">0/10</span></div>
+          </div>
+          <div class="message" id="msg">Toque para começar!</div>
+          <button class="start" id="start" onclick="startGame()">
+            COMEÇAR
+          </button>
+          <div>
+            <button id="down" onclick="lower()" disabled>⬇ DESCER</button>
+            <button id="up" onclick="raise()" disabled>⬆ SUBIR</button>
+          </div>
+          <p>Recompensa prevista: 0,005 BIO por repetição válida.</p>
+        </div>
+        <script>
+          let started = false;
+          let lowered = false;
+          let reps = 0;
+          let series = 0;
+          let total = 0;
+          const bar = document.getElementById('bar');
+          const msg = document.getElementById('msg');
+          const start = document.getElementById('start');
+          const down = document.getElementById('down');
+          const up = document.getElementById('up');
+
+          function startGame() {
+            if (series >= 4) return;
+            started = true;
+            start.disabled = true;
+            down.disabled = false;
+            up.disabled = false;
+            msg.textContent = 'Faça a descida e depois a subida.';
+          }
+
+          function lower() {
+            if (!started || lowered || series >= 4) return;
+            lowered = true;
+            bar.style.top = '125px';
+            msg.textContent = 'Agora empurre a barra para cima!';
+          }
+
+          function raise() {
+            if (!started || !lowered || series >= 4) return;
+            lowered = false;
+            bar.style.top = '65px';
+            reps++;
+            total++;
+            document.getElementById('reps').textContent = reps + '/10';
+            msg.textContent = '+0,005 BIO previsto!';
+
+            if (reps >= 10) {
+              reps = 0;
+              series++;
+              document.getElementById('series').textContent =
+                series + '/4';
+              document.getElementById('reps').textContent = '0/10';
+
+              if (series >= 4) {
+                started = false;
+                down.disabled = true;
+                up.disabled = true;
+                msg.textContent =
+                  'Desafio concluído! ' + total + ' repetições.';
+                start.textContent = 'DESAFIO CONCLUÍDO';
+              } else {
+                started = false;
+                down.disabled = true;
+                up.disabled = true;
+                start.disabled = false;
+                start.textContent = 'COMEÇAR SÉRIE ' + (series + 1);
+                msg.textContent = 'Série concluída! Descanse e continue.';
+              }
+            }
+          }
+        </script>
+        </body>
+        </html>
+        """,
+        height=480,
+        scrolling=False,
+    )
+
+
+
 # =========================================================
 # EXECUÇÃO PRINCIPAL
 # =========================================================
