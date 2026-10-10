@@ -1301,6 +1301,9 @@ def mostrar_participante():
         f"Olá, {participante['nome']}! 👋"
     )
 
+    # JOGO DE SUPINO BIOCORE
+    mostrar_jogo_supino()
+
     bio = int(
         participante.get("bio", 0) or 0
     )
