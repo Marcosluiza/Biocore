@@ -2109,6 +2109,430 @@ function raise() {
 )
 
 
+
+def mostrar_jogo_agachamento():
+    st.components.v1.html(
+        """
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          * { box-sizing: border-box; }
+          body {
+            margin: 0;
+            padding: 10px;
+            background: #11121b;
+            color: white;
+            font-family: Arial, sans-serif;
+          }
+          .game {
+            max-width: 760px;
+            margin: auto;
+            padding: 12px;
+            border-radius: 18px;
+            background: linear-gradient(160deg,#29253d,#11121b);
+            border: 1px solid #49405f;
+          }
+          h2 { text-align:center; margin:8px 0; font-size:20px; }
+          .sub { text-align:center; color:#d0c9e6; font-size:13px; }
+          #scene {
+            width:100%;
+            height:360px;
+            overflow:hidden;
+            border-radius:14px;
+            background:#171b2b;
+            margin-top:10px;
+          }
+          #scene canvas { display:block; }
+          .stats {
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:7px;
+            margin-top:10px;
+          }
+          .stat {
+            text-align:center;
+            background:#302e46;
+            padding:10px 3px;
+            border-radius:10px;
+            font-size:11px;
+          }
+          .stat strong {
+            display:block;
+            color:#e1b5ff;
+            font-size:18px;
+            margin-top:5px;
+          }
+          .progress {
+            height:9px;
+            background:#454258;
+            border-radius:10px;
+            overflow:hidden;
+            margin:12px 0;
+          }
+          #fill {
+            width:0%;
+            height:100%;
+            background:linear-gradient(90deg,#a855f7,#f0abfc);
+          }
+          .controls {
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:10px;
+          }
+          button {
+            padding:15px 5px;
+            border:0;
+            border-radius:12px;
+            color:white;
+            background:#8138cb;
+            font-size:15px;
+            font-weight:bold;
+            touch-action:manipulation;
+          }
+          #rise { background:#16766b; }
+          #reset {
+            width:100%;
+            margin-top:8px;
+            background:#414154;
+          }
+          #message {
+            text-align:center;
+            color:#f0d9ff;
+            margin-top:10px;
+            font-weight:bold;
+          }
+          .notice {
+            font-size:11px;
+            color:#bbb8cf;
+            text-align:center;
+            margin-top:10px;
+            line-height:1.5;
+          }
+        </style>
+        </head>
+        <body>
+        <div class="game">
+          <h2>🏋️ BIOCORE — AGACHAMENTO 3D</h2>
+          <div class="sub">Agache com a barra e volte à posição inicial</div>
+          <div id="scene"></div>
+
+          <div class="stats">
+            <div class="stat">SÉRIE
+              <strong id="series">1 / 4</strong>
+            </div>
+            <div class="stat">REPETIÇÕES
+              <strong id="reps">0 / 40</strong>
+            </div>
+            <div class="stat">BIO ESTIMADO
+              <strong id="bio">0.000</strong>
+            </div>
+          </div>
+
+          <div class="progress"><div id="fill"></div></div>
+
+          <div class="controls">
+            <button id="down">⬇ AGACHAR</button>
+            <button id="rise">⬆ SUBIR</button>
+          </div>
+          <button id="reset">↻ RECOMEÇAR</button>
+          <div id="message">Pronto para começar!</div>
+
+          <div class="notice">
+            Meta: 4 séries de 10 repetições.<br>
+            Recompensa demonstrativa: 0,005 BIO por repetição.<br>
+            Este protótipo não deposita BIO na carteira.
+          </div>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+        <script>
+        (() => {
+          const holder = document.getElementById('scene');
+
+          if (!window.THREE) {
+            holder.innerHTML =
+              '<p style="padding:20px;text-align:center">' +
+              'Não foi possível carregar o 3D. Verifique a internet.' +
+              '</p>';
+            return;
+          }
+
+          const scene = new THREE.Scene();
+          scene.background = new THREE.Color(0x171b2b);
+
+          const camera = new THREE.PerspectiveCamera(
+            42, holder.clientWidth / holder.clientHeight, 0.1, 100
+          );
+          camera.position.set(0.25, 2.6, 8.8);
+          camera.lookAt(0, 1.35, 0);
+
+          const renderer = new THREE.WebGLRenderer({antialias:true});
+          renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+          renderer.setSize(holder.clientWidth, holder.clientHeight);
+          renderer.outputEncoding = THREE.sRGBEncoding;
+          holder.appendChild(renderer.domElement);
+
+          scene.add(new THREE.HemisphereLight(0xdde5ff, 0x302039, 2));
+
+          const light = new THREE.DirectionalLight(0xffffff, 2.4);
+          light.position.set(-3, 7, 5);
+          scene.add(light);
+
+          const purpleLight = new THREE.PointLight(0xb34cff, 2);
+          purpleLight.position.set(3, 3, 2);
+          scene.add(purpleLight);
+
+          function mat(color, metalness=0, roughness=0.55) {
+            return new THREE.MeshStandardMaterial({
+              color:color,
+              metalness:metalness,
+              roughness:roughness
+            });
+          }
+
+          const skin = mat(0xc98d69);
+          const shirt = mat(0x8537d0);
+          const shorts = mat(0x25273b);
+          const shoes = mat(0xe4e7f4);
+          const steel = mat(0xc3cad6,0.85,0.25);
+          const plateMat = mat(0x252735,0.45,0.3);
+        </script>
+        </body>
+        </html>
+        """,
+        height=650,
+        scrolling=False,
+    )
+
+          function sphere(parent, x, y, z, sx, sy, sz, material) {
+            const mesh = new THREE.Mesh(
+              new THREE.SphereGeometry(1, 24, 16),
+              material
+            );
+            mesh.position.set(x, y, z);
+            mesh.scale.set(sx, sy, sz);
+            parent.add(mesh);
+            return mesh;
+          }
+
+          function cylinder(parent, x, y, z, radius, length, material) {
+            const mesh = new THREE.Mesh(
+              new THREE.CylinderGeometry(radius, radius, length, 24),
+              material
+            );
+            mesh.position.set(x, y, z);
+            parent.add(mesh);
+            return mesh;
+          }
+
+          function limb(parent, start, end, radius, material) {
+            const a = new THREE.Vector3(...start);
+            const b = new THREE.Vector3(...end);
+            const direction = new THREE.Vector3().subVectors(b, a);
+
+            const mesh = new THREE.Mesh(
+              new THREE.CylinderGeometry(
+                radius * 0.8, radius, direction.length(), 20
+              ),
+              material
+            );
+
+            mesh.position.copy(a).add(b).multiplyScalar(0.5);
+            mesh.quaternion.setFromUnitVectors(
+              new THREE.Vector3(0, 1, 0),
+              direction.normalize()
+            );
+            parent.add(mesh);
+            return mesh;
+          }
+
+          // Personagem
+          const athlete = new THREE.Group();
+          scene.add(athlete);
+
+          // Tronco, peito, pescoço e cabeça
+          sphere(athlete, 0, 1.78, 0, 0.44, 0.55, 0.28, shirt);
+          sphere(athlete, 0, 1.99, 0.13, 0.38, 0.25, 0.21, shirt);
+          cylinder(athlete, 0, 2.30, 0, 0.11, 0.15, skin);
+          sphere(athlete, 0, 2.53, 0, 0.23, 0.26, 0.22, skin);
+
+          // Olhos
+          sphere(athlete, -0.075, 2.56, 0.202, 0.025, 0.025, 0.012, plateMat);
+          sphere(athlete,  0.075, 2.56, 0.202, 0.025, 0.025, 0.012, plateMat);
+
+          // Quadril e shorts
+          sphere(athlete, 0, 1.22, 0, 0.38, 0.23, 0.24, shorts);
+
+          // Pernas com articulação nos joelhos
+          const leftLeg = new THREE.Group();
+          leftLeg.position.set(-0.21, 1.15, 0);
+          athlete.add(leftLeg);
+
+          limb(leftLeg, [0,0,0], [0,-0.47,0], 0.145, skin);
+          sphere(leftLeg, 0,-0.47,0, 0.14,0.14,0.14, skin);
+
+          const leftCalf = new THREE.Group();
+          leftCalf.position.set(0,-0.47,0);
+          leftLeg.add(leftCalf);
+
+          limb(leftCalf, [0,0,0], [0,-0.47,0], 0.10, skin);
+          sphere(leftCalf, 0,-0.46,0.02, 0.105,0.12,0.11, skin);
+          sphere(leftCalf, 0,-0.51,0.10, 0.15,0.085,0.23, shoes);
+
+          const rightLeg = new THREE.Group();
+          rightLeg.position.set(0.21, 1.15, 0);
+          athlete.add(rightLeg);
+
+          limb(rightLeg, [0,0,0], [0,-0.47,0], 0.145, skin);
+          sphere(rightLeg, 0,-0.47,0, 0.14,0.14,0.14, skin);
+
+          const rightCalf = new THREE.Group();
+          rightCalf.position.set(0,-0.47,0);
+          rightLeg.add(rightCalf);
+
+          limb(rightCalf, [0,0,0], [0,-0.47,0], 0.10, skin);
+          sphere(rightCalf, 0,-0.46,0.02, 0.105,0.12,0.11, skin);
+          sphere(rightCalf, 0,-0.51,0.10, 0.15,0.085,0.23, shoes);
+
+          // Braços segurando a barra
+          limb(athlete, [-0.39,2.02,0], [-0.59,1.91,0.10], 0.105, skin);
+          limb(athlete, [-0.59,1.91,0.10], [-0.49,2.25,0.18], 0.085, skin);
+          limb(athlete, [0.39,2.02,0], [0.59,1.91,0.10], 0.105, skin);
+          limb(athlete, [0.59,1.91,0.10], [0.49,2.25,0.18], 0.085, skin);
+
+          // Barra horizontal apoiada nos ombros
+          const bar = cylinder(athlete, 0, 2.28, 0, 0.045, 2.45, steel);
+          bar.rotation.z = Math.PI / 2;
+
+          // Anilhas dos dois lados da barra
+          [-1, 1].forEach(side => {
+            for (let i = 0; i < 3; i++) {
+              const x = side * (0.86 + i * 0.14);
+
+              const plate = cylinder(
+                athlete, x, 2.28, 0, 0.22 - i*0.015, 0.10, plateMat
+              );
+              plate.rotation.z = Math.PI / 2;
+
+              const center = cylinder(
+                athlete, x, 2.28, 0.01, 0.055, 0.105, steel
+              );
+              center.rotation.z = Math.PI / 2;
+            }
+          });
+
+          // Luzes decorativas no chão
+          const ring = new THREE.Mesh(
+            new THREE.TorusGeometry(1.0, 0.012, 8, 64),
+            mat(0x913fff, 0.3, 0.4)
+          );
+          ring.rotation.x = Math.PI / 2;
+          ring.position.y = 0.015;
+          ring.scale.set(1.3, 0.7, 1);
+          scene.add(ring);
+
+          // Estado do jogo
+          let reps = 0;
+          let isDown = false;
+          let targetDown = false;
+          let last = performance.now();
+
+          function updateStats() {
+            document.getElementById("reps").textContent = reps + " / 40";
+            document.getElementById("series").textContent =
+              (reps >= 40 ? 4 : Math.floor(reps / 10) + 1) + " / 4";
+            document.getElementById("bio").textContent =
+              (reps * 0.005).toFixed(3);
+            document.getElementById("fill").style.width =
+              (reps / 40 * 100) + "%";
+
+            document.getElementById("message").textContent =
+              reps >= 40 ? "🏆 Treino concluído!" :
+              reps > 0 ? "Boa! Continue treinando." :
+              "Pronto para começar!";
+          }
+
+          document.getElementById("down").addEventListener("click", () => {
+            if (reps >= 40 || isDown) return;
+            isDown = true;
+            targetDown = true;
+            document.getElementById("message").textContent =
+              "Desça com controle...";
+          });
+
+          document.getElementById("rise").addEventListener("click", () => {
+            if (!isDown || reps >= 40) return;
+
+            isDown = false;
+            targetDown = false;
+            reps++;
+            updateStats();
+          });
+
+          document.getElementById("reset").addEventListener("click", () => {
+            reps = 0;
+            isDown = false;
+            targetDown = false;
+            athlete.position.y = 0;
+            leftLeg.rotation.x = 0;
+            rightLeg.rotation.x = 0;
+            leftCalf.rotation.x = 0;
+            rightCalf.rotation.x = 0;
+            updateStats();
+          });
+
+          // Animação 3D
+          function animate(now) {
+            requestAnimationFrame(animate);
+
+            const dt = Math.min((now - last) / 1000, 0.05);
+            last = now;
+
+            const downY = targetDown ? -0.32 : 0;
+            athlete.position.y +=
+              (downY - athlete.position.y) * Math.min(1, dt * 5);
+
+            const thighAngle = targetDown ? 0.30 : 0;
+            const kneeAngle = targetDown ? -0.58 : 0;
+
+            leftLeg.rotation.x +=
+              (thighAngle - leftLeg.rotation.x) * Math.min(1, dt * 5);
+            rightLeg.rotation.x +=
+              (thighAngle - rightLeg.rotation.x) * Math.min(1, dt * 5);
+
+            leftCalf.rotation.x +=
+              (kneeAngle - leftCalf.rotation.x) * Math.min(1, dt * 5);
+            rightCalf.rotation.x +=
+              (kneeAngle - rightCalf.rotation.x) * Math.min(1, dt * 5);
+
+            renderer.render(scene, camera);
+          }
+
+          function resizeGame() {
+            const width = holder.clientWidth;
+            const height = holder.clientHeight;
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+          }
+
+          window.addEventListener("resize", resizeGame);
+
+          updateStats();
+          requestAnimationFrame(animate);
+        })();
+        </script>
+        </body>
+        </html>
+        """,
+        height=650,
+        scrolling=False,
+    )
+
+
+
 # =========================================================
 # EXECUÇÃO PRINCIPAL
 # =========================================================
