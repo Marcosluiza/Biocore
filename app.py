@@ -1927,35 +1927,46 @@ def mostrar_jogo_agachamento():
             updateStats();
           });
 
+
           function animate(now) {
             requestAnimationFrame(animate);
 
-            const dt = Math.min((now-last)/1000,0.05);
+            const dt = Math.min((now - last) / 1000, 0.05);
             last = now;
 
+            // Mantém os pés na altura original
             const t = targetDown ? 1 : 0;
-            const smooth = t*t*(3-2*t);
+            const smooth = t * t * (3 - 2 * t);
 
-            const hipDrop = 0.48*smooth;
-            athlete.position.y +=
-              (-hipDrop-athlete.position.y)*Math.min(1,dt*6);
-
-            const thighAngle = -0.62*smooth;
-            const calfAngle = 0.95*smooth;
+            // Flexão visível das coxas e dos joelhos
+            const thighAngle = -0.85 * smooth;
+            const calfAngle = 1.15 * smooth;
 
             leftLeg.rotation.x +=
-              (thighAngle-leftLeg.rotation.x)*Math.min(1,dt*7);
+              (thighAngle - leftLeg.rotation.x) *
+              Math.min(1, dt * 8);
+
             rightLeg.rotation.x +=
-              (thighAngle-rightLeg.rotation.x)*Math.min(1,dt*7);
+              (thighAngle - rightLeg.rotation.x) *
+              Math.min(1, dt * 8);
 
             leftCalf.rotation.x +=
-              (calfAngle-leftCalf.rotation.x)*Math.min(1,dt*7);
-            rightCalf.rotation.x +=
-              (calfAngle-rightCalf.rotation.x)*Math.min(1,dt*7);
+              (calfAngle - leftCalf.rotation.x) *
+              Math.min(1, dt * 8);
 
-            renderer.render(scene,camera);
+            rightCalf.rotation.x +=
+              (calfAngle - rightCalf.rotation.x) *
+              Math.min(1, dt * 8);
+
+            // Desce pouco o corpo, sem afundá-lo no chão
+            const bodyY = -0.12 * smooth;
+            athlete.position.y +=
+              (bodyY - athlete.position.y) *
+              Math.min(1, dt * 6);
+
+            renderer.render(scene, camera);
           }
-          
+
 
           function resizeGame() {
             const w = holder.clientWidth;
