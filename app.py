@@ -1959,7 +1959,7 @@ def mostrar_jogo_agachamento():
               Math.min(1, dt * 8);
 
             // Desce pouco o corpo, sem afundá-lo no chão
-            const bodyY = -0.50 * smooth;
+            const bodyY = -0.01 * smooth;
             athlete.position.y +=
               (bodyY - athlete.position.y) *
               Math.min(1, dt * 6);
