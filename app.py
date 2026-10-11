@@ -1727,6 +1727,32 @@ def mostrar_jogo_supino():
             border-radius: 50%;
             z-index: 3;
           }
+
+          .arm {
+          position: absolute;
+          width: 12px;
+          height: 48px;
+          background: #f1c6a8;
+          border-radius: 10px;
+          z-index: 4;
+          transform-origin: top center
+          
+          }
+          
+          .arm-left {
+          left: 42%;
+          top: 83px;
+          transform: rotate(-25deg);
+          
+          }
+          
+          .arm-right {
+          right: 42%;
+          top: 83px;
+          transform: rotate(25deg);
+          
+          }
+
           .bar {
             position: absolute;
             left: 12%;
@@ -1736,6 +1762,7 @@ def mostrar_jogo_supino():
             border-radius: 6px;
             top: 65px;
             transition: top .35s ease;
+            
           }
           .plate {
             position: absolute;
