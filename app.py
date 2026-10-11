@@ -1815,8 +1815,7 @@ def mostrar_jogo_supino():
     <div class="leg leg-left"></div>
     <div class="leg leg-right"></div>
 
-    <div class="arm arm-left" id="armLeft"></
-  div>
+    <div class="arm arm-left" id="armLeft"></div>
     <div class="arm arm-right" id="armRight"></
   div>
 
