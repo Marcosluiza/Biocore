@@ -1940,7 +1940,7 @@ def mostrar_jogo_agachamento():
 
             // Flexão visível das coxas e dos joelhos
             const thighAngle = -1.25 * smooth;
-            const calfAngle = 1.99 * smooth;
+            const calfAngle = 1.15 * smooth;
 
             leftLeg.rotation.x +=
               (thighAngle - leftLeg.rotation.x) *
@@ -1959,7 +1959,7 @@ def mostrar_jogo_agachamento():
               Math.min(1, dt * 8);
 
             // Desce pouco o corpo, sem afundá-lo no chão
-            const bodyY = -0.25 * smooth;
+            const bodyY = -0.50 * smooth;
             athlete.position.y +=
               (bodyY - athlete.position.y) *
               Math.min(1, dt * 6);
