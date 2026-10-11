@@ -1705,15 +1705,18 @@ def mostrar_jogo_supino():
             background: #a1a1aa;
             border-radius: 8px;
           }
+          
           .body {
             position: absolute;
-            left: 28%;
+            left: 35%;
             bottom: 65px;
-            width: 44%;
-            height: 28px;
+            width: 30%;
+            height: 45px;
             background: #c084fc;
-            border-radius: 20px;
+            border-radius: 12px;
+            z-index: 2;
           }
+
           .head {
             position: absolute;
             left: 19%;
