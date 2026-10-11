@@ -1594,7 +1594,7 @@ def mostrar_login_cadastro():
 
         
 
-def mostrar_jogo_agachamento():
+gdef mostrar_jogo_agachamento():
     st.components.v1.html(
         """
         <!DOCTYPE html>
