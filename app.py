@@ -1417,64 +1417,7 @@ def jogo_penalti(participante_id):
 
     st.write("### Escolha o canto:")
 
-    col1, col2, col3 = st.columns(3)
 
-    with col1:
-        esquerda = st.button(
-            "⬅️ Esquerda",
-            use_container_width=True
-        )
-
-    with col2:
-        centro = st.button(
-            "⬆️ Centro",
-            use_container_width=True
-        )
-
-    with col3:
-        direita = st.button(
-            "➡️ Direita",
-            use_container_width=True
-        )
-
-    if esquerda or centro or direita:
-
-        st.session_state.penaltis += 1
-
-        direcao_goleiro = secrets.choice(
-            ["esquerda", "centro", "direita"]
-        )
-
-        if esquerda:
-            chute = "esquerda"
-        elif centro:
-            chute = "centro"
-        else:
-            chute = "direita"
-
-        if chute == direcao_goleiro:
-
-            st.error("🧤 DEFENDEU!")
-
-        else:
-
-            st.session_state.gols_penalti += 1
-            st.session_state.bio_penalti += 1
-
-            st.success("⚽ GOOOOOL! +1 BIO")
-
-        st.rerun()
-
-    if st.button(
-        "🔄 Zerar jogo",
-        use_container_width=True
-    ):
-
-        st.session_state.penaltis = 0
-        st.session_state.gols_penalti = 0
-        st.session_state.bio_penalti = 0
-
-        st.rerun()
 # =========================================================
 # LOGIN DO PARTICIPANTE
 # =========================================================
