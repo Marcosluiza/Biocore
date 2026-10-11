@@ -378,7 +378,6 @@ def mostrar_cabecalho():
         "Treine, registre suas atividades e acumule BIO."
     )
     
-def mostrar_jogo_agachamento():
     
 def mostrar_botao_sair():
     if (
