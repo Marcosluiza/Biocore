@@ -1719,12 +1719,13 @@ def mostrar_jogo_supino():
 
           .head {
             position: absolute;
-            left: 19%;
-            bottom: 68px;
+            left: calc(50% - 15px);
+            bottom: 108px;
             width: 30px;
             height: 30px;
             background: #f1c6a8;
             border-radius: 50%;
+            z-index: 3;
           }
           .bar {
             position: absolute;
