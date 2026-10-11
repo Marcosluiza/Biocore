@@ -1804,24 +1804,29 @@ def mostrar_jogo_supino():
         </head>
         <body>
         <div class="game">
-          <div class="gym">
-            <div class="bench"></div>
-            
-            <!-- BONECO -->
-            <div class="head"></div>
-            <div class="body"></div>
-            <div class="arm arm-left" id="armLeft"></
-        div>
-            <div class="arm arm-right" id="armRight"></div>
+        <div class="gym">
+  <div class="bench"></div>
 
-            <!-- BARRA E ANILHAS -->
-            <div class="bar" id="bar">
-            <span class="plate left"></span>
-            <span class="plate right"></span>
-           </div>
-         </div>
+  <div class="head"></div>
+    <div class="neck"></div>
+    <div class="body"></div>
+    <div class="hip"></div>
 
-         <div class="stats">
+    <div class="leg leg-left"></div>
+    <div class="leg leg-right"></div>
+
+    <div class="arm arm-left" id="armLeft"></
+  div>
+    <div class="arm arm-right" id="armRight"></
+  div>
+
+  <div class="bar" id="bar">
+    <span class="plate left"></span>
+    <span class="plate right"></span>
+  </div>
+</div>
+
+          
             <div>SÉRIE<br><span class="number" id="series">0/4</span></div>
             <div>REPETIÇÕES<br><span class="number" id="reps">0/10</span></div>
           </div>
