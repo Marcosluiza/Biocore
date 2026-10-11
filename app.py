@@ -377,8 +377,9 @@ def mostrar_cabecalho():
     st.write(
         "Treine, registre suas atividades e acumule BIO."
     )
-
-
+    
+def mostrar_jogo_agachamento():
+    
 def mostrar_botao_sair():
     if (
         st.session_state.participante
