@@ -1684,7 +1684,7 @@ def mostrar_jogo_supino():
             font-family: Arial, sans-serif;
             text-align: center;
           }
-          .game {
+ ⁸         .game {
             padding: 12px;
             border-radius: 16px;
             background: #242131;
@@ -1696,7 +1696,7 @@ def mostrar_jogo_supino():
             background: linear-gradient(#353047, #17151f);
             border-radius: 12px;
           }
-          .bench {
+          .9 {
             position: absolute;
             left: 15%;
             right: 15%;
@@ -1719,6 +1719,33 @@ def mostrar_jogo_supino():
 
           .head {
             position: absolute;
+          
+          .bench {
+            position: absolute;
+            left: 15%;
+            right: 15%;
+            bottom: 43px;
+            height: 18px;
+            background: #a1a1aa;
+            border-radius: 8px;
+            z-index: 1;
+          }
+
+          /* Tronco */
+          .body {
+            position: absolute;
+            left: 35%;
+            bottom: 65px;
+            width: 30%;
+            height: 45px;
+            background: #c084fc;
+            border-radius: 12px;
+            z-index: 2;
+          }
+
+          /* Cabeça */
+          .head {
+            position: absolute;
             left: calc(50% - 15px);
             bottom: 108px;
             width: 30px;
@@ -1728,31 +1755,75 @@ def mostrar_jogo_supino():
             z-index: 3;
           }
 
-          .arm {
-          position: absolute;
-          width: 12px;
-          height: 48px;
-          background: #f1c6a8;
-          border-radius: 10px;
-          z-index: 4;
-          transform-origin: top center
-          
-          }
-          
-          .arm-left {
-          left: 42%;
-          top: 83px;
-          transform: rotate(-25deg);
-          
-          }
-          
-          .arm-right {
-          right: 42%;
-          top: 83px;
-          transform: rotate(25deg);
-          
+          /* Pescoço */
+          .neck {
+            position: absolute;
+            left: calc(50% - 7px);
+            bottom: 99px;
+            width: 14px;
+            height: 18px;
+            background: #f1c6a8;
+            border-radius: 5px;
+            z-index: 2;
           }
 
+          /* Quadril */
+          .hip {
+            position: absolute;
+            left: 59%;
+            bottom: 61px;
+            width: 35px;
+            height: 29px;
+            background: #a855f7;
+            border-radius: 10px;
+            z-index: 2;
+          }
+
+          /* Pernas */
+          .leg {
+            position: absolute;
+            bottom: 20px;
+            width: 17px;
+            height: 58px;
+            background: #c084fc;
+            border-radius: 10px;
+            transform-origin: top center;
+            z-index: 2;
+          }
+
+          .leg-left {
+            left: 62%;
+            transform: rotate(-15deg);
+          }
+
+          .leg-right {
+            left: 70%;
+            transform: rotate(-5deg);
+          }
+
+          /* Braços */
+          .arm {
+            position: absolute;
+            top: 70px;
+            width: 12px;
+            height: 49px;
+            background: #f1c6a8;
+            border-radius: 10px;
+            transform-origin: top center;
+            z-index: 4;
+          }
+
+          .arm-left {
+            left: 42%;
+            transform: rotate(-12deg);
+          }
+
+          .arm-right {
+            left: 57%;
+            transform: rotate(12deg);
+          }
+
+          /* Barra */
           .bar {
             position: absolute;
             left: 12%;
@@ -1762,8 +1833,10 @@ def mostrar_jogo_supino():
             border-radius: 6px;
             top: 65px;
             transition: top .35s ease;
-            
+            z-index: 5;
           }
+
+          /* Anilhas */
           .plate {
             position: absolute;
             top: -13px;
@@ -1773,8 +1846,10 @@ def mostrar_jogo_supino():
             border: 3px solid #c026d3;
             border-radius: 4px;
           }
+
           .left { left: 8%; }
           .right { right: 8%; }
+
           .stats {
             display: flex;
             justify-content: space-around;
