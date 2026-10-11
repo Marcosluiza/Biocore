@@ -1587,373 +1587,355 @@ def mostrar_login_cadastro():
     with aba_cadastro:
         cadastro_participante()
 
+      }
 
-
+      
 def mostrar_jogo_supino():
-    
-import streamlit as st
+    st.components.v1.html(
+        """
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+* { box-sizing: border-box; }
 
-st.components.v1.html(
-    """
-    <!DOCTYPE html>
-    <html lang="pt-BR">
-    <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-      * { box-sizing: border-box; }
+body {
+    margin: 0;
+    padding: 8px;
+    background: #17151f;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
 
-      body {
-        margin: 0;
-        padding: 8px;
-        background: #17151f;
-        color: white;
-        font-family: Arial, sans-serif;
-        text-align: center;
-      }
+.game {
+    max-width: 520px;
+    margin: auto;
+    padding: 12px;
+    border-radius: 18px;
+    background: #242131;
+}
 
-      .game {
-        max-width: 520px;
-        margin: auto;
-        padding: 12px;
-        border-radius: 18px;
-        background: #242131;
-      }
+h2 {
+    margin: 4px 0 12px;
+    color: #f0abfc;
+    font-size: 22px;
+}
 
-      h2 {
-        margin: 4px 0 12px;
-        color: #f0abfc;
-        font-size: 22px;
-      }
+.gym {
+    position: relative;
+    height: 280px;
+    overflow: hidden;
+    border-radius: 14px;
+    background:
+        radial-gradient(ellipse at 50% 20%, #49415e, transparent 70%),
+        linear-gradient(#302b40, #17151f);
+}
 
-      .gym {
-        position: relative;
-        width: 100%;
-        height: 260px;
-        overflow: hidden;
-        border-radius: 14px;
-        background:
-          radial-gradient(ellipse at 50% 20%, #48415d, transparent 70%),
-          linear-gradient(#302b40, #17151f);
-      }
+.floor {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 38px;
+    background: #292635;
+    border-top: 3px solid #514a60;
+}
 
-      .floor {
-        position: absolute;
-        bottom: 0;
-        width: 100%;
-        height: 43px;
-        background: #292635;
-        border-top: 3px solid #514a60;
-      }
+/* Banco */
+.bench {
+    position: absolute;
+    left: 15%;
+    bottom: 76px;
+    width: 61%;
+    height: 17px;
+    border-radius: 7px;
+    background: linear-gradient(#b6bbc6, #626979);
+    z-index: 2;
+}
 
-      /* Banco de supino */
-      .bench {
-        position: absolute;
-        left: 17%;
-        bottom: 48px;
-        width: 57%;
-        height: 17px;
-        background: linear-gradient(#9ca3af, #525866);
-        border-radius: 8px;
-        z-index: 2;
-      }
+.bench-support {
+    position: absolute;
+    left: 42%;
+    bottom: 39px;
+    height: 41px;
+    width: 10px;
+    background: #717784;
+    z-index: 1;
+}
 
-      .bench-leg {
-        position: absolute;
-        left: 43%;
-        bottom: 18px;
-        height: 34px;
-        width: 9px;
-        background: #717784;
-        z-index: 1;
-      }
+.bench-foot {
+    position: absolute;
+    left: 31%;
+    bottom: 35px;
+    width: 33%;
+    height: 7px;
+    background: #a1a1aa;
+    border-radius: 5px;
+    z-index: 2;
+}
 
-      .bench-foot {
-        position: absolute;
-        left: 34%;
-        bottom: 15px;
-        width: 28%;
-        height: 6px;
-        background: #a1a1aa;
-        border-radius: 5px;
-        z-index: 2;
-      }
+/* Cabeça e rosto */
+.head {
+    position: absolute;
+    left: 15%;
+    top: 143px;
+    width: 34px;
+    height: 37px;
+    border-radius: 45% 45% 42% 42%;
+    background: #d9a17e;
+    z-index: 5;
+}
 
-      /* Atleta: cabeça */
-      .head {
-        position: absolute;
-        left: 19%;
-        top: 119px;
-        width: 34px;
-        height: 36px;
-        background: #d9a17e;
-        border-radius: 46% 48% 42% 44%;
-        z-index: 5;
-      }
+.hair {
+    position: absolute;
+    left: 14.5%;
+    top: 140px;
+    width: 35px;
+    height: 15px;
+    border-radius: 70% 60% 20% 15%;
+    background: #30251f;
+    z-index: 6;
+}
 
-      .hair {
-        position: absolute;
-        left: 18%;
-        top: 116px;
-        width: 35px;
-        height: 15px;
-        background: #30251f;
-        border-radius: 70% 60% 15% 15%;
-        z-index: 6;
-      }
+.eye {
+    position: absolute;
+    left: 20%;
+    top: 157px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #30251f;
+    z-index: 7;
+}
 
-      .eye {
-        position: absolute;
-        left: 46%;
-        top: 133px;
-        width: 4px;
-        height: 4px;
-        background: #30251f;
-        border-radius: 50%;
-        z-index: 7;
-      }
+.neck {
+    position: absolute;
+    left: 21%;
+    top: 166px;
+    width: 17px;
+    height: 21px;
+    border-radius: 5px;
+    background: #c58e6d;
+    z-index: 3;
+}
 
-      /* Pescoço */
-      .neck {
-        position: absolute;
-        left: 25%;
-        top: 143px;
-        width: 19px;
-        height: 20px;
-        background: #c58e6d;
-        border-radius: 5px;
-        z-index: 4;
-      }
+/* Tronco atlético */
+.torso {
+    position: absolute;
+    left: 23%;
+    top: 166px;
+    width: 34%;
+    height: 34px;
+    border-radius: 14px 19px 12px 12px;
+    background: linear-gradient(180deg, #a855f7, #6b21a8);
+    transform: rotate(-2deg);
+    z-index: 4;
+}
 
-      /* Tronco e roupa */
-      .body-athlete {
-        position: absolute;
-        left: 27%;
-        top: 143px;
-        width: 34%;
-        height: 34px;
-        background: linear-gradient(180deg, #a855f7, #6b21a8);
-        border-radius: 16px 20px 12px 12px;
-        transform: rotate(2deg);
-        z-index: 4;
-      }
+.shirt-seam {
+    position: absolute;
+    left: 39%;
+    top: 168px;
+    height: 28px;
+    width: 2px;
+    background: #d8b4fe;
+    z-index: 5;
+}
 
-      .shirt-line {
-        position: absolute;
-        left: 42%;
-        top: 145px;
-        width: 3px;
-        height: 27px;
-        background: #d8b4fe;
-        transform: rotate(2deg);
-        z-index: 5;
-      }
+/* Cintura e calção */
+.hip {
+    position: absolute;
+    left: 53%;
+    top: 172px;
+    width: 20%;
+    height: 29px;
+    border-radius: 9px;
+    background: #4c1d95;
+    z-index: 4;
+}
 
-      /* Quadril */
-      .hip {
-        position: absolute;
-        left: 56%;
-        top: 147px;
-        width: 20%;
-        height: 31px;
-        background: #4c1d95;
-        border-radius: 10px;
-        z-index: 4;
-      }
+/* Pernas */
+.leg {
+    position: absolute;
+    top: 188px;
+    width: 17px;
+    height: 53px;
+    border-radius: 9px;
+    background: #334155;
+    transform-origin: top center;
+    z-index: 3;
+}
 
-      /* Pernas e tênis */
-      .leg {
-        position: absolute;
-        top: 163px;
-        width: 17px;
-        height: 56px;
-        background: #334155;
-        border-radius: 10px;
-        transform-origin: top center;
-        z-index: 3;
-      }
+.leg-left {
+    left: 61%;
+    transform: rotate(35deg);
+}
 
-      .leg-left {
-        left: 65%;
-        transform: rotate(34deg);
-      }
+.leg-right {
+    left: 69%;
+    transform: rotate(43deg);
+}
 
-      .leg-right {
-        left: 72%;
-        transform: rotate(43deg);
-      }
+.shoe {
+    position: absolute;
+    width: 27px;
+    height: 12px;
+    border-radius: 8px 12px 5px 5px;
+    background: #e879f9;
+    z-index: 4;
+}
 
-      .shoe {
-        position: absolute;
-        width: 28px;
-        height: 12px;
-        background: #e879f9;
-        border-radius: 8px 12px 5px 5px;
-        z-index: 4;
-      }
+.shoe-left {
+    left: 73%;
+    top: 231px;
+    transform: rotate(27deg);
+}
 
-      .shoe-left {
-        left: 76%;
-        top: 208px;
-        transform: rotate(27deg);
-      }
+.shoe-right {
+    left: 81%;
+    top: 239px;
+    transform: rotate(34deg);
+}
 
-      .shoe-right {
-        left: 82%;
-        top: 217px;
-        transform: rotate(34deg);
-      }
+/* Braços: movimento acompanha a barra */
+.arm {
+    position: absolute;
+    top: 83px;
+    width: 13px;
+    height: 78px;
+    border-radius: 10px;
+    background: #d9a17e;
+    transform-origin: 50% 90%;
+    transition: transform .3s ease;
+    z-index: 6;
+}
 
-      /* Braços */
-      .arm {
-        position: absolute;
-        top: 69px;
-        width: 13px;
-        height: 79px;
-        background: #d9a17e;
-        border-radius: 10px;
-        transform-origin: 50% 90%;
-        z-index: 6;
-        transition: transform .35s ease;
-      }
+.arm-left {
+    left: 34%;
+    transform: rotate(-9deg);
+}
 
-      .arm-left {
-        left: 38%;
-        transform: rotate(-9deg);
-      }
+.arm-right {
+    left: 49%;
+    transform: rotate(9deg);
+}
 
-      .arm-right {
-        left: 54%;
-        transform: rotate(9deg);
-      }
+.hand {
+    position: absolute;
+    top: 78px;
+    width: 17px;
+    height: 15px;
+    border-radius: 7px;
+    background: #d9a17e;
+    transition: top .3s ease;
+    z-index: 7;
+}
 
-      .hand {
-        position: absolute;
-        top: 65px;
-        width: 17px;
-        height: 16px;
-        background: #d9a17e;
-        border-radius: 7px;
-        z-index: 7;
-        transition: top .35s ease;
-      }
+.hand-left { left: 32%; }
+.hand-right { left: 48%; }
 
-      .hand-left { left: 36.5%; }
-      .hand-right { left: 53%; }
+/* Barra e anilhas */
+.bar {
+    position: absolute;
+    left: 7%;
+    top: 76px;
+    width: 86%;
+    height: 9px;
+    border-radius: 5px;
+    background: linear-gradient(#fff, #9ca3af);
+    box-shadow: 0 3px 5px #0007;
+    transition: top .3s ease;
+    z-index: 8;
+}
 
-      /* Barra e anilhas */
-      .bar {
-        position: absolute;
-        top: 62px;
-        left: 8%;
-        width: 84%;
-        height: 9px;
-        border-radius: 5px;
-        background: linear-gradient(#f8fafc, #9ca3af);
-        box-shadow: 0 3px 5px #0007;
-        z-index: 8;
-        transition: top .35s ease;
-      }
+.plate {
+    position: absolute;
+    top: -14px;
+    width: 18px;
+    height: 37px;
+    border: 3px solid #a21caf;
+    border-radius: 5px;
+    background: linear-gradient(90deg, #e879f9, #86198f);
+}
 
-      .plate {
-        position: absolute;
-        top: -14px;
-        width: 17px;
-        height: 37px;
-        border: 3px solid #a21caf;
-        border-radius: 5px;
-        background: linear-gradient(90deg, #d946ef, #86198f);
-      }
+.plate-left { left: 5%; }
+.plate-right { right: 5%; }
 
-      .plate-left { left: 5%; }
-      .plate-right { right: 5%; }
+.stats {
+    display: flex;
+    justify-content: space-around;
+    gap: 7px;
+    margin: 13px 0;
+}
 
-      .collar {
-        position: absolute;
-        top: -7px;
-        width: 6px;
-        height: 23px;
-        background: #e5e7eb;
-        border-radius: 2px;
-      }
+.stat {
+    flex: 1;
+    padding: 10px 3px;
+    border-radius: 10px;
+    background: #302b40;
+    font-size: 11px;
+}
 
-      .collar-left { left: 13%; }
-      .collar-right { right: 13%; }
+.number {
+    display: block;
+    margin-top: 5px;
+    color: #f0abfc;
+    font-size: 23px;
+    font-weight: bold;
+}
 
-      .stats {
-        display: flex;
-        justify-content: space-around;
-        gap: 8px;
-        margin: 14px 0;
-      }
+.message {
+    min-height: 42px;
+    padding: 10px 2px;
+    color: #e9d5ff;
+    font-size: 14px;
+}
 
-      .stat {
-        flex: 1;
-        padding: 10px 4px;
-        background: #302b40;
-        border-radius: 10px;
-        font-size: 12px;
-      }
+button {
+    width: 47%;
+    margin: 4px 1%;
+    padding: 14px 3px;
+    border: 0;
+    border-radius: 12px;
+    background: #a21caf;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    touch-action: manipulation;
+}
 
-      .number {
-        display: block;
-        margin-top: 5px;
-        color: #f0abfc;
-        font-size: 24px;
-        font-weight: bold;
-      }
+button:disabled { opacity: .35; }
 
-      .message {
-        min-height: 42px;
-        padding: 10px 3px;
-        color: #e9d5ff;
-        font-size: 14px;
-      }
+.start {
+    width: 98%;
+    background: #7e22ce;
+}
 
-      button {
-        width: 47%;
-        margin: 4px 1%;
-        padding: 14px 4px;
-        border: 0;
-        border-radius: 12px;
-        background: #a21caf;
-        color: white;
-        font-size: 15px;
-        font-weight: bold;
-        touch-action: manipulation;
-      }
+.reward {
+    margin-top: 10px;
+    padding: 11px;
+    border-radius: 10px;
+    background: #302b40;
+    color: #e9d5ff;
+    font-size: 13px;
+}
 
-      button:disabled { opacity: .35; }
+.hint {
+    color: #c4b5fd;
+    font-size: 11px;
+}
+</style>
+</head>
 
-      .start {
-        width: 98%;
-        background: #7e22ce;
-      }
+<body>
+<div class="game">
+    <h2>🏋️ BIOCORE SUPINO</h2>
 
-      .reward {
-        margin-top: 12px;
-        padding: 10px;
-        background: #302b40;
-        border-radius: 10px;
-        font-size: 13px;
-        color: #e9d5ff;
-      }
-
-      .hint {
-        color: #c4b5fd;
-        font-size: 11px;
-        margin: 9px 0 0;
-      }
-    </style>
-    </head>
-
-    <body>
-    <div class="game">
-      <h2>🏋️ BIOCORE SUPINO</h2>
-
-      <div class="gym" id="gym">
+    <div class="gym">
         <div class="floor"></div>
-        <div class="bench-leg"></div>
+        <div class="bench-support"></div>
         <div class="bench-foot"></div>
         <div class="bench"></div>
 
@@ -1963,8 +1945,8 @@ st.components.v1.html(
         <div class="shoe shoe-right"></div>
 
         <div class="hip"></div>
-        <div class="body-athlete"></div>
-        <div class="shirt-line"></div>
+        <div class="torso"></div>
+        <div class="shirt-seam"></div>
         <div class="neck"></div>
         <div class="head"></div>
         <div class="hair"></div>
@@ -1976,161 +1958,158 @@ st.components.v1.html(
         <div class="hand hand-right" id="handRight"></div>
 
         <div class="bar" id="bar">
-          <span class="plate plate-left"></span>
-          <span class="plate plate-right"></span>
-          <span class="collar collar-left"></span>
-          <span class="collar collar-right"></span>
+            <span class="plate plate-left"></span>
+            <span class="plate plate-right"></span>
         </div>
-      </div>
-
-      <div class="stats">
-        <div class="stat">
-          SÉRIE
-          <span class="number" id="series">0/4</span>
-        </div>
-        <div class="stat">
-          REPETIÇÕES
-          <span class="number" id="reps">0/10</span>
-        </div>
-        <div class="stat">
-          TOTAL
-          <span class="number" id="total">0</span>
-        </div>
-      </div>
-
-      <div class="message" id="msg">
-        Toque em COMEÇAR para iniciar!
-      </div>
-
-      <button class="start" id="start" onclick="startGame()">
-        COMEÇAR
-      </button>
-
-      <div>
-        <button id="down" onclick="lower()" disabled>
-          ⬇ DESCER
-        </button>
-        <button id="up" onclick="raise()" disabled>
-          ⬆ SUBIR
-        </button>
-      </div>
-
-      <div class="reward">
-        Recompensa prevista: <strong>0,005 BIO</strong> por repetição válida.
-        <br>
-        Estimativa do desafio completo: <strong>0,2 BIO</strong>.
-      </div>
-
-      <p class="hint">
-        Faça a descida antes da subida. Complete 10 repetições por série.
-      </p>
     </div>
 
-    <script>
-      let started = false;
-      let lowered = false;
-      let reps = 0;
-      let series = 0;
-      let total = 0;
+    <div class="stats">
+        <div class="stat">
+            SÉRIE
+            <span class="number" id="series">0/4</span>
+        </div>
+        <div class="stat">
+            REPETIÇÕES
+            <span class="number" id="reps">0/10</span>
+        </div>
+        <div class="stat">
+            TOTAL
+            <span class="number" id="total">0</span>
+        </div>
+    </div>
 
-      const bar = document.getElementById("bar");
-      const msg = document.getElementById("msg");
-      const start = document.getElementById("start");
-      const down = document.getElementById("down");
-      const up = document.getElementById("up");
-      const armLeft = document.getElementById("armLeft");
-      const armRight = document.getElementById("armRight");
-      const handLeft = document.getElementById("handLeft");
-      const handRight = document.getElementById("handRight");
+    <div class="message" id="msg">
+        Toque em COMEÇAR para iniciar!
+    </div>
 
-      function updateStats() {
-        document.getElementById("series").textContent =
-          series + "/4";
-        document.getElementById("reps").textContent =
-          reps + "/10";
-        document.getElementById("total").textContent = total;
-      }
+    <button class="start" id="start" onclick="startGame()">
+        COMEÇAR
+    </button>
 
-      function startGame() {
-        if (series >= 4 || started) return;
+    <div>
+        <button id="down" onclick="lower()" disabled>
+            ⬇ DESCER
+        </button>
+        <button id="up" onclick="raise()" disabled>
+            ⬆ SUBIR
+        </button>
+    </div>
 
-        started = true;
-        lowered = false;
-        start.disabled = true;
-        down.disabled = false;
-        up.disabled = false;
+    <div class="reward">
+        Recompensa prevista: <strong>0,005 BIO</strong> por repetição.
+        <br>
+        40 repetições = <strong>0,2 BIO previsto</strong>.
+    </div>
 
-        bar.style.top = "62px";
-        armLeft.style.transform = "rotate(-9deg)";
-        armRight.style.transform = "rotate(9deg)";
-        handLeft.style.top = "65px";
-        handRight.style.top = "65px";
+    <p class="hint">
+        Desça e depois suba a barra para validar cada repetição.
+    </p>
+</div>
 
-        msg.textContent = "Desça a barra até o peito.";
-      }
+<script>
+let started = false;
+let lowered = false;
+let reps = 0;
+let series = 0;
+let total = 0;
 
-      function lower() {
-        if (!started || lowered || series >= 4) return;
+const bar = document.getElementById("bar");
+const msg = document.getElementById("msg");
+const start = document.getElementById("start");
+const down = document.getElementById("down");
+const up = document.getElementById("up");
+const armLeft = document.getElementById("armLeft");
+const armRight = document.getElementById("armRight");
+const handLeft = document.getElementById("handLeft");
+const handRight = document.getElementById("handRight");
 
-        lowered = true;
-        bar.style.top = "119px";
-        armLeft.style.transform = "rotate(-27deg)";
-        armRight.style.transform = "rotate(27deg)";
-        handLeft.style.top = "122px";
-        handRight.style.top = "122px";
+function updateStats() {
+    document.getElementById("series").textContent = series + "/4";
+    document.getElementById("reps").textContent = reps + "/10";
+    document.getElementById("total").textContent = total;
+}
 
-        msg.textContent = "Agora empurre a barra para cima!";
-      }
+function startGame() {
+    if (series >= 4 || started) return;
 
-      function raise() {
-        if (!started || !lowered || series >= 4) return;
+    started = true;
+    lowered = false;
+    start.disabled = true;
+    down.disabled = false;
+    up.disabled = false;
 
-        lowered = false;
-        bar.style.top = "62px";
-        armLeft.style.transform = "rotate(-9deg)";
-        armRight.style.transform = "rotate(9deg)";
-        handLeft.style.top = "65px";
-        handRight.style.top = "65px";
+    bar.style.top = "76px";
+    armLeft.style.transform = "rotate(-9deg)";
+    armRight.style.transform = "rotate(9deg)";
+    handLeft.style.top = "78px";
+    handRight.style.top = "78px";
 
-        reps++;
-        total++;
+    msg.textContent = "Desça a barra até o peito.";
+}
+
+function lower() {
+    if (!started || lowered || series >= 4) return;
+
+    lowered = true;
+    bar.style.top = "133px";
+    armLeft.style.transform = "rotate(-30deg)";
+    armRight.style.transform = "rotate(30deg)";
+    handLeft.style.top = "135px";
+    handRight.style.top = "135px";
+
+    msg.textContent = "Agora empurre a barra para cima!";
+}
+
+function raise() {
+    if (!started || !lowered || series >= 4) return;
+
+    lowered = false;
+    bar.style.top = "76px";
+    armLeft.style.transform = "rotate(-9deg)";
+    armRight.style.transform = "rotate(9deg)";
+    handLeft.style.top = "78px";
+    handRight.style.top = "78px";
+
+    reps++;
+    total++;
+    updateStats();
+
+    if (reps >= 10) {
+        reps = 0;
+        series++;
         updateStats();
 
-        if (reps >= 10) {
-          reps = 0;
-          series++;
-          updateStats();
-
-          if (series >= 4) {
+        if (series >= 4) {
             started = false;
             down.disabled = true;
             up.disabled = true;
             start.disabled = true;
             start.textContent = "DESAFIO CONCLUÍDO";
             msg.textContent =
-              "Desafio concluído! " + total +
-              " repetições realizadas. BIO previsto: 0,2.";
-          } else {
+                "Desafio concluído! " + total +
+                " repetições. BIO previsto: 0,2.";
+        } else {
             started = false;
             down.disabled = true;
             up.disabled = true;
             start.disabled = false;
             start.textContent = "COMEÇAR SÉRIE " + (series + 1);
             msg.textContent =
-              "Série concluída! Descanse e inicie a próxima.";
-          }
-        } else {
-          msg.textContent =
-            "+0,005 BIO previsto! Próxima repetição: desça a barra.";
+                "Série concluída! Descanse e continue.";
         }
-      }
-    </script>
-    </body>
-    </html>
-    """,
-    height=650,
-    scrolling=False,
+    } else {
+        msg.textContent =
+            "+0,005 BIO previsto! Faça a próxima descida.";
+    }
+}
+</script>
+</body>
+</html>
+        """,
+        height=680,
+        scrolling=False,
 )
+
 
 
 
