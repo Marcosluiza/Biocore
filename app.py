@@ -1587,8 +1587,7 @@ def mostrar_login_cadastro():
     with aba_cadastro:
         cadastro_participante()
 
-      }
-      
+        
 def mostrar_jogo_supino():
     st.components.v1.html(
         """
