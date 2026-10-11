@@ -1664,323 +1664,548 @@ def mostrar_login_cadastro():
 
 
 def mostrar_jogo_supino():
-    import streamlit.components.v1 as components
+    
+import streamlit as st
 
-    st.header("🏋️ BioCore Supino")
-    st.caption("Complete 4 séries de 10 repetições.")
+st.components.v1.html(
+    """
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      * { box-sizing: border-box; }
 
-    components.html(
-        """
-        <!DOCTYPE html>
-        <html lang="pt-BR">
-        <head>
-        <meta name="viewport"
-              content="width=device-width, initial-scale=1">
-        <style>
-          body {
-            margin: 0;
-            background: #17151f;
-            color: white;
-            font-family: Arial, sans-serif;
-            text-align: center;
-          }
- ⁸         .game {
-            padding: 12px;
-            border-radius: 16px;
-            background: #242131;
-          }
-          .gym {
-            height: 230px;
-            position: relative;
-            overflow: hidden;
-            background: linear-gradient(#353047, #17151f);
-            border-radius: 12px;
-          }
-          .9 {
-            position: absolute;
-            left: 15%;
-            right: 15%;
-            bottom: 43px;
-            height: 18px;
-            background: #a1a1aa;
-            border-radius: 8px;
-          }
-          
-          .body {
-            position: absolute;
-            left: 35%;
-            bottom: 65px;
-            width: 30%;
-            height: 45px;
-            background: #c084fc;
-            border-radius: 12px;
-            z-index: 2;
-          }
+      body {
+        margin: 0;
+        padding: 8px;
+        background: #17151f;
+        color: white;
+        font-family: Arial, sans-serif;
+        text-align: center;
+      }
 
-          .head {
-            position: absolute;
-          
-          .bench {
-            position: absolute;
-            left: 15%;
-            right: 15%;
-            bottom: 43px;
-            height: 18px;
-            background: #a1a1aa;
-            border-radius: 8px;
-            z-index: 1;
-          }
+      .game {
+        max-width: 520px;
+        margin: auto;
+        padding: 12px;
+        border-radius: 18px;
+        background: #242131;
+      }
 
-          /* Tronco */
-          .body {
-            position: absolute;
-            left: 35%;
-            bottom: 65px;
-            width: 30%;
-            height: 45px;
-            background: #c084fc;
-            border-radius: 12px;
-            z-index: 2;
-          }
+      h2 {
+        margin: 4px 0 12px;
+        color: #f0abfc;
+        font-size: 22px;
+      }
 
-          /* Cabeça */
-          .head {
-            position: absolute;
-            left: calc(50% - 15px);
-            bottom: 108px;
-            width: 30px;
-            height: 30px;
-            background: #f1c6a8;
-            border-radius: 50%;
-            z-index: 3;
-          }
+      .gym {
+        position: relative;
+        width: 100%;
+        height: 260px;
+        overflow: hidden;
+        border-radius: 14px;
+        background:
+          radial-gradient(ellipse at 50% 20%, #48415d, transparent 70%),
+          linear-gradient(#302b40, #17151f);
+      }
 
-          /* Pescoço */
-          .neck {
-            position: absolute;
-            left: calc(50% - 7px);
-            bottom: 99px;
-            width: 14px;
-            height: 18px;
-            background: #f1c6a8;
-            border-radius: 5px;
-            z-index: 2;
-          }
+      .floor {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 43px;
+        background: #292635;
+        border-top: 3px solid #514a60;
+      }
 
-          /* Quadril */
-          .hip {
-            position: absolute;
-            left: 59%;
-            bottom: 61px;
-            width: 35px;
-            height: 29px;
-            background: #a855f7;
-            border-radius: 10px;
-            z-index: 2;
-          }
+      /* Banco de supino */
+      .bench {
+        position: absolute;
+        left: 17%;
+        bottom: 48px;
+        width: 57%;
+        height: 17px;
+        background: linear-gradient(#9ca3af, #525866);
+        border-radius: 8px;
+        z-index: 2;
+      }
 
-          /* Pernas */
-          .leg {
-            position: absolute;
-            bottom: 20px;
-            width: 17px;
-            height: 58px;
-            background: #c084fc;
-            border-radius: 10px;
-            transform-origin: top center;
-            z-index: 2;
-          }
+      .bench-leg {
+        position: absolute;
+        left: 43%;
+        bottom: 18px;
+        height: 34px;
+        width: 9px;
+        background: #717784;
+        z-index: 1;
+      }
 
-          .leg-left {
-            left: 62%;
-            transform: rotate(-15deg);
-          }
+      .bench-foot {
+        position: absolute;
+        left: 34%;
+        bottom: 15px;
+        width: 28%;
+        height: 6px;
+        background: #a1a1aa;
+        border-radius: 5px;
+        z-index: 2;
+      }
 
-          .leg-right {
-            left: 70%;
-            transform: rotate(-5deg);
-          }
+      /* Atleta: cabeça */
+      .head {
+        position: absolute;
+        left: 19%;
+        top: 119px;
+        width: 34px;
+        height: 36px;
+        background: #d9a17e;
+        border-radius: 46% 48% 42% 44%;
+        z-index: 5;
+      }
 
-          /* Braços */
-          .arm {
-            position: absolute;
-            top: 70px;
-            width: 12px;
-            height: 49px;
-            background: #f1c6a8;
-            border-radius: 10px;
-            transform-origin: top center;
-            z-index: 4;
-          }
+      .hair {
+        position: absolute;
+        left: 18%;
+        top: 116px;
+        width: 35px;
+        height: 15px;
+        background: #30251f;
+        border-radius: 70% 60% 15% 15%;
+        z-index: 6;
+      }
 
-          .arm-left {
-            left: 42%;
-            transform: rotate(-12deg);
-          }
+      .eye {
+        position: absolute;
+        left: 46%;
+        top: 133px;
+        width: 4px;
+        height: 4px;
+        background: #30251f;
+        border-radius: 50%;
+        z-index: 7;
+      }
 
-          .arm-right {
-            left: 57%;
-            transform: rotate(12deg);
-          }
+      /* Pescoço */
+      .neck {
+        position: absolute;
+        left: 25%;
+        top: 143px;
+        width: 19px;
+        height: 20px;
+        background: #c58e6d;
+        border-radius: 5px;
+        z-index: 4;
+      }
 
-          /* Barra */
-          .bar {
-            position: absolute;
-            left: 12%;
-            width: 76%;
-            height: 9px;
-            background: #e5e7eb;
-            border-radius: 6px;
-            top: 65px;
-            transition: top .35s ease;
-            z-index: 5;
-          }
+      /* Tronco e roupa */
+      .body-athlete {
+        position: absolute;
+        left: 27%;
+        top: 143px;
+        width: 34%;
+        height: 34px;
+        background: linear-gradient(180deg, #a855f7, #6b21a8);
+        border-radius: 16px 20px 12px 12px;
+        transform: rotate(2deg);
+        z-index: 4;
+      }
 
-          /* Anilhas */
-          .plate {
-            position: absolute;
-            top: -13px;
-            width: 15px;
-            height: 35px;
-            background: #e879f9;
-            border: 3px solid #c026d3;
-            border-radius: 4px;
-          }
+      .shirt-line {
+        position: absolute;
+        left: 42%;
+        top: 145px;
+        width: 3px;
+        height: 27px;
+        background: #d8b4fe;
+        transform: rotate(2deg);
+        z-index: 5;
+      }
 
-          .left { left: 8%; }
-          .right { right: 8%; }
+      /* Quadril */
+      .hip {
+        position: absolute;
+        left: 56%;
+        top: 147px;
+        width: 20%;
+        height: 31px;
+        background: #4c1d95;
+        border-radius: 10px;
+        z-index: 4;
+      }
 
-          .stats {
-            display: flex;
-            justify-content: space-around;
-            margin: 15px 0;
-          }
-          .number {
-            font-size: 24px;
-            font-weight: bold;
-            color: #e879f9;
-          }
-          button {
-            width: 47%;
-            padding: 15px 5px;
-            margin: 3px 1%;
-            border: 0;
-            border-radius: 12px;
-            background: #c026d3;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            touch-action: manipulation;
-          }
-          button:disabled { opacity: .35; }
-          .start { width: 96%; background: #7e22ce; }
-          .message { min-height: 24px; color: #ddd6fe; }
-        </style>
-        </head>
-        <body>
-        <div class="game">
-        <div class="gym">
-  <div class="bench"></div>
+      /* Pernas e tênis */
+      .leg {
+        position: absolute;
+        top: 163px;
+        width: 17px;
+        height: 56px;
+        background: #334155;
+        border-radius: 10px;
+        transform-origin: top center;
+        z-index: 3;
+      }
 
-  <div class="head"></div>
-    <div class="neck"></div>
-    <div class="body"></div>
-    <div class="hip"></div>
+      .leg-left {
+        left: 65%;
+        transform: rotate(34deg);
+      }
 
-    <div class="leg leg-left"></div>
-    <div class="leg leg-right"></div>
+      .leg-right {
+        left: 72%;
+        transform: rotate(43deg);
+      }
 
-    <div class="arm arm-left" id="armLeft"></div>
-    <div class="arm arm-right" id="armRight"></
-  div>
+      .shoe {
+        position: absolute;
+        width: 28px;
+        height: 12px;
+        background: #e879f9;
+        border-radius: 8px 12px 5px 5px;
+        z-index: 4;
+      }
 
-  <div class="bar" id="bar">
-    <span class="plate left"></span>
-    <span class="plate right"></span>
-  </div>
-</div>
+      .shoe-left {
+        left: 76%;
+        top: 208px;
+        transform: rotate(27deg);
+      }
 
-          
-            <div>SÉRIE<br><span class="number" id="series">0/4</span></div>
-            <div>REPETIÇÕES<br><span class="number" id="reps">0/10</span></div>
-          </div>
-          <div class="message" id="msg">Toque para começar!</div>
-          <button class="start" id="start" onclick="startGame()">
-            COMEÇAR
-          </button>
-          <div>
-            <button id="down" onclick="lower()" disabled>⬇ DESCER</button>
-            <button id="up" onclick="raise()" disabled>⬆ SUBIR</button>
-          </div>
-          <p>Recompensa prevista: 0,005 BIO por repetição válida.</p>
+      .shoe-right {
+        left: 82%;
+        top: 217px;
+        transform: rotate(34deg);
+      }
+
+      /* Braços */
+      .arm {
+        position: absolute;
+        top: 69px;
+        width: 13px;
+        height: 79px;
+        background: #d9a17e;
+        border-radius: 10px;
+        transform-origin: 50% 90%;
+        z-index: 6;
+        transition: transform .35s ease;
+      }
+
+      .arm-left {
+        left: 38%;
+        transform: rotate(-9deg);
+      }
+
+      .arm-right {
+        left: 54%;
+        transform: rotate(9deg);
+      }
+
+      .hand {
+        position: absolute;
+        top: 65px;
+        width: 17px;
+        height: 16px;
+        background: #d9a17e;
+        border-radius: 7px;
+        z-index: 7;
+        transition: top .35s ease;
+      }
+
+      .hand-left { left: 36.5%; }
+      .hand-right { left: 53%; }
+
+      /* Barra e anilhas */
+      .bar {
+        position: absolute;
+        top: 62px;
+        left: 8%;
+        width: 84%;
+        height: 9px;
+        border-radius: 5px;
+        background: linear-gradient(#f8fafc, #9ca3af);
+        box-shadow: 0 3px 5px #0007;
+        z-index: 8;
+        transition: top .35s ease;
+      }
+
+      .plate {
+        position: absolute;
+        top: -14px;
+        width: 17px;
+        height: 37px;
+        border: 3px solid #a21caf;
+        border-radius: 5px;
+        background: linear-gradient(90deg, #d946ef, #86198f);
+      }
+
+      .plate-left { left: 5%; }
+      .plate-right { right: 5%; }
+
+      .collar {
+        position: absolute;
+        top: -7px;
+        width: 6px;
+        height: 23px;
+        background: #e5e7eb;
+        border-radius: 2px;
+      }
+
+      .collar-left { left: 13%; }
+      .collar-right { right: 13%; }
+
+      .stats {
+        display: flex;
+        justify-content: space-around;
+        gap: 8px;
+        margin: 14px 0;
+      }
+
+      .stat {
+        flex: 1;
+        padding: 10px 4px;
+        background: #302b40;
+        border-radius: 10px;
+        font-size: 12px;
+      }
+
+      .number {
+        display: block;
+        margin-top: 5px;
+        color: #f0abfc;
+        font-size: 24px;
+        font-weight: bold;
+      }
+
+      .message {
+        min-height: 42px;
+        padding: 10px 3px;
+        color: #e9d5ff;
+        font-size: 14px;
+      }
+
+      button {
+        width: 47%;
+        margin: 4px 1%;
+        padding: 14px 4px;
+        border: 0;
+        border-radius: 12px;
+        background: #a21caf;
+        color: white;
+        font-size: 15px;
+        font-weight: bold;
+        touch-action: manipulation;
+      }
+
+      button:disabled { opacity: .35; }
+
+      .start {
+        width: 98%;
+        background: #7e22ce;
+      }
+
+      .reward {
+        margin-top: 12px;
+        padding: 10px;
+        background: #302b40;
+        border-radius: 10px;
+        font-size: 13px;
+        color: #e9d5ff;
+      }
+
+      .hint {
+        color: #c4b5fd;
+        font-size: 11px;
+        margin: 9px 0 0;
+      }
+    </style>
+    </head>
+
+    <body>
+    <div class="game">
+      <h2>🏋️ BIOCORE SUPINO</h2>
+
+      <div class="gym" id="gym">
+        <div class="floor"></div>
+        <div class="bench-leg"></div>
+        <div class="bench-foot"></div>
+        <div class="bench"></div>
+
+        <div class="leg leg-left"></div>
+        <div class="leg leg-right"></div>
+        <div class="shoe shoe-left"></div>
+        <div class="shoe shoe-right"></div>
+
+        <div class="hip"></div>
+        <div class="body-athlete"></div>
+        <div class="shirt-line"></div>
+        <div class="neck"></div>
+        <div class="head"></div>
+        <div class="hair"></div>
+        <div class="eye"></div>
+
+        <div class="arm arm-left" id="armLeft"></div>
+        <div class="arm arm-right" id="armRight"></div>
+        <div class="hand hand-left" id="handLeft"></div>
+        <div class="hand hand-right" id="handRight"></div>
+
+        <div class="bar" id="bar">
+          <span class="plate plate-left"></span>
+          <span class="plate plate-right"></span>
+          <span class="collar collar-left"></span>
+          <span class="collar collar-right"></span>
         </div>
-        <script>
-          let started = false;
-          let lowered = false;
-          let reps = 0;
-          let series = 0;
-          let total = 0;
-          const bar = document.getElementById('bar');
-          const msg = document.getElementById('msg');
-          const start = document.getElementById('start');
-          const down = document.getElementById('down');
-          const up = document.getElementById('up');
+      </div>
 
-          function startGame() {
-            if (series >= 4) return;
-            started = true;
+      <div class="stats">
+        <div class="stat">
+          SÉRIE
+          <span class="number" id="series">0/4</span>
+        </div>
+        <div class="stat">
+          REPETIÇÕES
+          <span class="number" id="reps">0/10</span>
+        </div>
+        <div class="stat">
+          TOTAL
+          <span class="number" id="total">0</span>
+        </div>
+      </div>
+
+      <div class="message" id="msg">
+        Toque em COMEÇAR para iniciar!
+      </div>
+
+      <button class="start" id="start" onclick="startGame()">
+        COMEÇAR
+      </button>
+
+      <div>
+        <button id="down" onclick="lower()" disabled>
+          ⬇ DESCER
+        </button>
+        <button id="up" onclick="raise()" disabled>
+          ⬆ SUBIR
+        </button>
+      </div>
+
+      <div class="reward">
+        Recompensa prevista: <strong>0,005 BIO</strong> por repetição válida.
+        <br>
+        Estimativa do desafio completo: <strong>0,2 BIO</strong>.
+      </div>
+
+      <p class="hint">
+        Faça a descida antes da subida. Complete 10 repetições por série.
+      </p>
+    </div>
+
+    <script>
+      let started = false;
+      let lowered = false;
+      let reps = 0;
+      let series = 0;
+      let total = 0;
+
+      const bar = document.getElementById("bar");
+      const msg = document.getElementById("msg");
+      const start = document.getElementById("start");
+      const down = document.getElementById("down");
+      const up = document.getElementById("up");
+      const armLeft = document.getElementById("armLeft");
+      const armRight = document.getElementById("armRight");
+      const handLeft = document.getElementById("handLeft");
+      const handRight = document.getElementById("handRight");
+
+      function updateStats() {
+        document.getElementById("series").textContent =
+          series + "/4";
+        document.getElementById("reps").textContent =
+          reps + "/10";
+        document.getElementById("total").textContent = total;
+      }
+
+      function startGame() {
+        if (series >= 4 || started) return;
+
+        started = true;
+        lowered = false;
+        start.disabled = true;
+        down.disabled = false;
+        up.disabled = false;
+
+        bar.style.top = "62px";
+        armLeft.style.transform = "rotate(-9deg)";
+        armRight.style.transform = "rotate(9deg)";
+        handLeft.style.top = "65px";
+        handRight.style.top = "65px";
+
+        msg.textContent = "Desça a barra até o peito.";
+      }
+
+      function lower() {
+        if (!started || lowered || series >= 4) return;
+
+        lowered = true;
+        bar.style.top = "119px";
+        armLeft.style.transform = "rotate(-27deg)";
+        armRight.style.transform = "rotate(27deg)";
+        handLeft.style.top = "122px";
+        handRight.style.top = "122px";
+
+        msg.textContent = "Agora empurre a barra para cima!";
+      }
+
+      function raise() {
+        if (!started || !lowered || series >= 4) return;
+
+        lowered = false;
+        bar.style.top = "62px";
+        armLeft.style.transform = "rotate(-9deg)";
+        armRight.style.transform = "rotate(9deg)";
+        handLeft.style.top = "65px";
+        handRight.style.top = "65px";
+
+        reps++;
+        total++;
+        updateStats();
+
+        if (reps >= 10) {
+          reps = 0;
+          series++;
+          updateStats();
+
+          if (series >= 4) {
+            started = false;
+            down.disabled = true;
+            up.disabled = true;
             start.disabled = true;
-            down.disabled = false;
-            up.disabled = false;
-            msg.textContent = 'Faça a descida e depois a subida.';
+            start.textContent = "DESAFIO CONCLUÍDO";
+            msg.textContent =
+              "Desafio concluído! " + total +
+              " repetições realizadas. BIO previsto: 0,2.";
+          } else {
+            started = false;
+            down.disabled = true;
+            up.disabled = true;
+            start.disabled = false;
+            start.textContent = "COMEÇAR SÉRIE " + (series + 1);
+            msg.textContent =
+              "Série concluída! Descanse e inicie a próxima.";
           }
+        } else {
+          msg.textContent =
+            "+0,005 BIO previsto! Próxima repetição: desça a barra.";
+        }
+      }
+    </script>
+    </body>
+    </html>
+    """,
+    height=650,
+    scrolling=False,
+)
 
-          function lower() {
-            if (!started || lowered || series >= 4) return;
-            lowered = true;
-            bar.style.top = '125px';
-            msg.textContent = 'Agora empurre a barra para cima!';
-          }
-
-          function raise() {
-            if (!started || !lowered || series >= 4) return;
-            lowered = false;
-            bar.style.top = '65px';
-            reps++;
-            total++;
-            document.getElementById('reps').textContent = reps + '/10';
-            msg.textContent = '+0,005 BIO previsto!';
-
-            if (reps >= 10) {
-              reps = 0;
-              series++;
-              document.getElementById('series').textContent =
-                series + '/4';
-              document.getElementById('reps').textContent = '0/10';
-
-              if (series >= 4) {
-                started = false;
-                down.disabled = true;
-                up.disabled = true;
-                msg.textContent =
-                  'Desafio concluído! ' + total + ' repetições.';
-                start.textContent = 'DESAFIO CONCLUÍDO';
-              } else {
-                started = false;
-                down.disabled = true;
-                up.disabled = true;
-                start.disabled = false;
-                start.textContent = 'COMEÇAR SÉRIE ' + (series + 1);
-                msg.textContent = 'Série concluída! Descanse e continue.';
-              }
-            }
-          }
-        </script>
-        </body>
-        </html>
-        """,
-        height=480,
-        scrolling=False,
     )
 
 
