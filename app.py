@@ -1815,7 +1815,7 @@ def mostrar_jogo_agachamento():
                 radius*0.8,radius,direction.length(),20
               ),material
             );
-            mesh.position.copy(start).add(b ? end : start).multiplyScalar(0.5);
+            mesh.position.copy(start).add(end).multiplyScalar(0.5);
             mesh.quaternion.setFromUnitVectors(
               new THREE.Vector3(0,1,0),direction.normalize()
             );
