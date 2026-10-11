@@ -1301,12 +1301,14 @@ def mostrar_participante():
         f"Olá, {participante['nome']}! 👋"
     )
 
-    # JOGO DE AGACHAMENTO BIOCORE
+# JOGO DE AGACHAMENTO BIOCORE
     if st.button("🏋️ Jogar agachamento 3D"):
-    st.session_state["abrir_jogo_agachamento"] = True
-    if st.session_state.get("abrir_jogo_agachamento", False):
-     mostrar_jogo_agachamento()
+        st.session_state["abrir_jogo_agachamento"] = True
 
+    if st.session_state.get("abrir_jogo_agachamento", False):
+        mostrar_jogo_agachamento()
+
+    
     bio = int(
         participante.get("bio", 0) or 0
     )
