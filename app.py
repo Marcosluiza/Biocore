@@ -1883,6 +1883,7 @@ def mostrar_jogo_agachamento():
             }
           });
 
+          
           // Controles e repetições
           let reps = 0;
           let isDown = false;
@@ -1928,27 +1929,33 @@ def mostrar_jogo_agachamento():
 
           function animate(now) {
             requestAnimationFrame(animate);
+
             const dt = Math.min((now-last)/1000,0.05);
             last = now;
 
-            const y = targetDown ? -0.32 : 0;
-            athlete.position.y +=
-              (y-athlete.position.y)*Math.min(1,dt*5);
+            const t = targetDown ? 1 : 0;
+            const smooth = t*t*(3-2*t);
 
-            const thigh = targetDown ? 0.30 : 0;
-            const knee = targetDown ? -0.58 : 0;
+            const hipDrop = 0.48*smooth;
+            athlete.position.y +=
+              (-hipDrop-athlete.position.y)*Math.min(1,dt*6);
+
+            const thighAngle = -0.62*smooth;
+            const calfAngle = 0.95*smooth;
 
             leftLeg.rotation.x +=
-              (thigh-leftLeg.rotation.x)*Math.min(1,dt*5);
+              (thighAngle-leftLeg.rotation.x)*Math.min(1,dt*7);
             rightLeg.rotation.x +=
-              (thigh-rightLeg.rotation.x)*Math.min(1,dt*5);
+              (thighAngle-rightLeg.rotation.x)*Math.min(1,dt*7);
+
             leftCalf.rotation.x +=
-              (knee-leftCalf.rotation.x)*Math.min(1,dt*5);
+              (calfAngle-leftCalf.rotation.x)*Math.min(1,dt*7);
             rightCalf.rotation.x +=
-              (knee-rightCalf.rotation.x)*Math.min(1,dt*5);
+              (calfAngle-rightCalf.rotation.x)*Math.min(1,dt*7);
 
             renderer.render(scene,camera);
           }
+          
 
           function resizeGame() {
             const w = holder.clientWidth;
