@@ -1,4 +1,4 @@
-import binascii
+7import binascii
 import hashlib
 import secrets
 from datetime import datetime, timedelta, timezone
@@ -2205,8 +2205,6 @@ st.components.v1.html(
     height=650,
     scrolling=False,
 )
-
-    )
 
 
 
