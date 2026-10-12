@@ -1939,7 +1939,7 @@ def mostrar_jogo_agachamento():
             const smooth = t * t * (3 - 2 * t);
 
             // Agachamento mais profundo
-            const thighAngle = -0.65 * smooth;
+            const thighAngle = -1.45 * smooth;
             const calfAngle = 1.35 * smooth;
 
             leftLeg.rotation.x +=
