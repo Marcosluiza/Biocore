@@ -1838,12 +1838,14 @@ def mostrar_jogo_agachamento():
           limb(leftLeg,[0,0,0],[0,-0.47,0],0.145,skin);
           sphere(leftLeg,0,-0.47,0,0.14,0.14,0.14,skin);
 
+          
           const leftCalf = new THREE.Group();
           leftCalf.position.set(0,-0.47,0);
           leftLeg.add(leftCalf);
           limb(leftCalf,[0,0,0],[0,-0.47,0],0.10,skin);
           sphere(leftCalf,0,-0.46,0.02,0.105,0.12,0.11,skin);
-          sphere(leftCalf,0,-0.51,0.10,0.15,0.085,0.23,shoes);
+          sphere(leftCalf,0,-0.47,0.10,0.15,0.07,0.23,shoes);
+
 
           // Perna direita e joelho
           const rightLeg = new THREE.Group();
