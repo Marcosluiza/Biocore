@@ -1959,7 +1959,7 @@ def mostrar_jogo_agachamento():
               Math.min(1, dt * 8);
 
             // Quadril desce sem afundar tanto o personagem
-            const bodyY = -0.50 * smooth;
+            const bodyY = -0.40 * smooth;
             athlete.position.y +=
               (bodyY - athlete.position.y) *
               Math.min(1, dt * 6);
