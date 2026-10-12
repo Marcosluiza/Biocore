@@ -1939,8 +1939,8 @@ def mostrar_jogo_agachamento():
             const smooth = t * t * (3 - 2 * t);
 
             // Agachamento mais profundo
-            const thighAngle = -1.60 * smooth;
-            const calfAngle = 1.28 * smooth;
+            const thighAngle = -1.70 * smooth;
+            const calfAngle = 1.32 * smooth;
 
             leftLeg.rotation.x +=
               (thighAngle - leftLeg.rotation.x) *
@@ -1959,7 +1959,7 @@ def mostrar_jogo_agachamento():
               Math.min(1, dt * 8);
 
             // Quadril desce sem afundar tanto o personagem
-            const bodyY = -0.25 * smooth;
+            const bodyY = -0.28 * smooth;
             athlete.position.y +=
               (bodyY - athlete.position.y) *
               Math.min(1, dt * 6);
