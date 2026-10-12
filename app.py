@@ -1928,19 +1928,19 @@ def mostrar_jogo_agachamento():
           });
 
 
+          
           function animate(now) {
             requestAnimationFrame(animate);
 
             const dt = Math.min((now - last) / 1000, 0.05);
             last = now;
 
-            // Mantém os pés na altura original
             const t = targetDown ? 1 : 0;
             const smooth = t * t * (3 - 2 * t);
 
-            // Flexão visível das coxas e dos joelhos
-            const thighAngle = -1.00 * smooth;
-            const calfAngle = 1.30 * smooth;
+            // Agachamento mais profundo
+            const thighAngle = -0.65 * smooth;
+            const calfAngle = 1.35 * smooth;
 
             leftLeg.rotation.x +=
               (thighAngle - leftLeg.rotation.x) *
@@ -1958,14 +1958,15 @@ def mostrar_jogo_agachamento():
               (calfAngle - rightCalf.rotation.x) *
               Math.min(1, dt * 8);
 
-            // Desce pouco o corpo, sem afundá-lo no chão
-            const bodyY = -0.35 * smooth;
+            // Quadril desce sem afundar tanto o personagem
+            const bodyY = -0.30 * smooth;
             athlete.position.y +=
               (bodyY - athlete.position.y) *
               Math.min(1, dt * 6);
 
             renderer.render(scene, camera);
           }
+          
 
 
           function resizeGame() {
