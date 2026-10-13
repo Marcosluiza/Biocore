@@ -1640,7 +1640,7 @@ def mostrar_roleta_biocore(participante):
         "#F39C12", "#E74C3C", "#6C5CE7", "#55516B"
     ]
 
-    if usados < 3:
+    if usados < 6:
         if st.button("🎡 GIRAR A ROLETA", key="girar_roleta_biocore"):
             premio_nome, premio_bio = random.choices(
                 premios,
