@@ -1794,11 +1794,11 @@ def mostrar_roleta_biocore(participante):
           o.start();
           o.stop(audio.currentTime + duracao);
         }
-
+        
         if (indice !== null) {
-        const angulo = 360 * 6 + (360 - (indice * 45 + 22.5));
+  const angulo = 360 * 6 + (360 - (indice * 45 + 22.5));
 
-roda.animate(
+  roda.animate(
     [
       { transform: 'rotate(0deg)' },
       { transform: 'rotate(' + angulo + 'deg)' }
@@ -1809,6 +1809,8 @@ roda.animate(
       fill: 'forwards'
     }
   );
+
+        
           let cliques = 0;
           const somGiro = setInterval(() => {
             bip(500 + (cliques % 4) * 100, 0.035);
