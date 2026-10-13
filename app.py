@@ -1581,6 +1581,428 @@ def mostrar_login_cadastro():
 
           
 
+def mostrar_jogo_agachamento():
+    import streamlit.components.v1 as components
+
+    components.html("""
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    background: #171321;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+.game {
+    max-width: 600px;
+    margin: auto;
+    padding: 12px;
+}
+h2 { color: #e8a5ff; margin: 8px 0; }
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 7px;
+    margin: 12px 0;
+}
+.stat {
+    background: #292239;
+    padding: 10px 3px;
+    border-radius: 10px;
+}
+.number {
+    color: #f0b0ff;
+    font-size: 22px;
+    font-weight: bold;
+}
+.label { font-size: 12px; color: #d3c6e6; }
+#scene {
+    width: 100%;
+    height: 340px;
+    background: #211b32;
+    border: 1px solid #654582;
+    border-radius: 14px;
+    overflow: hidden;
+}
+.controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 12px;
+}
+button {
+    border: 0;
+    border-radius: 12px;
+    padding: 15px 6px;
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+    background: #843fc0;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+button:active { transform: scale(.97); }
+#down { background: #593477; }
+#reset {
+    width: 100%;
+    margin-top: 9px;
+    background: #393044;
+}
+#message {
+    color: #e8a5ff;
+    min-height: 22px;
+    margin-top: 10px;
+    font-size: 14px;
+}
+.progress {
+    background: #393044;
+    border-radius: 20px;
+    height: 10px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+#bar {
+    width: 0%;
+    height: 100%;
+    background: #d477ff;
+    transition: width .2s;
+}
+.small { color: #bcb0cb; font-size: 12px; margin-top: 9px; }
+</style>
+</head>
+<body>
+<div class="game">
+    <h2>💪 BIOCORE — ROSCA DIRETA</h2>
+    <div class="small">Treine os bíceps com dois halteres</div>
+
+    <div class="stats">
+        <div class="stat">
+            <div class="number" id="reps">0/40</div>
+            <div class="label">Repetições</div>
+        </div>
+        <div class="stat">
+            <div class="number" id="series">1/4</div>
+            <div class="label">Série</div>
+        </div>
+        <div class="stat">
+            <div class="number" id="bio">0</div>
+            <div class="label">BIO demonstrativo</div>
+        </div>
+    </div>
+
+    <div id="scene"></div>
+
+    <div class="progress"><div id="bar"></div></div>
+
+    <div class="controls">
+        <button id="up">⬆ SUBIR HALTERES</button>
+        <button id="down">⬇ DESCER HALTERES</button>
+    </div>
+
+    <button id="reset">↻ RECOMEÇAR TREINO</button>
+
+    <div id="message">Toque em SUBIR HALTERES para começar.</div>
+    <div class="small">4 séries de 10 repetições • Total: 40</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function() {
+    const sceneBox = document.getElementById("scene");
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x211b32);
+
+    const camera = new THREE.PerspectiveCamera(
+        38,
+        sceneBox.clientWidth / sceneBox.clientHeight,
+        0.1,
+        100
+    );
+    camera.position.set(0, 2.1, 8.5);
+    camera.lookAt(0, 1.65, 0);
+
+    const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: false
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(sceneBox.clientWidth, sceneBox.clientHeight);
+    sceneBox.appendChild(renderer.domElement);
+
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x514064, 2));
+
+    const light = new THREE.DirectionalLight(0xffffff, 2);
+    light.position.set(3, 6, 5);
+    scene.add(light);
+
+    function material(color, roughness) {
+        return new THREE.MeshStandardMaterial({
+            color: color,
+            roughness: roughness === undefined ? 0.7 : roughness
+        });
+    }
+
+    const skin = material(0xd99a70);
+    const shirt = material(0x9b4bd1);
+    const pants = material(0x34334b);
+    const shoeMat = material(0x111116);
+    const metal = material(0xb9c1ce, 0.35);
+    const weights = material(0x292936, 0.4);
+
+    function sphere(parent, x, y, z, sx, sy, sz, mat) {
+        const mesh = new THREE.Mesh(
+            new THREE.SphereGeometry(1, 24, 16),
+            mat
+        );
+        mesh.position.set(x, y, z);
+        mesh.scale.set(sx, sy, sz);
+        parent.add(mesh);
+        return mesh;
+    }
+
+    function cylinder(parent, radiusTop, radiusBottom, length, mat, x, y, z) {
+        const mesh = new THREE.Mesh(
+            new THREE.CylinderGeometry(
+                radiusTop, radiusBottom, length, 16
+            ),
+            mat
+        );
+        mesh.position.set(x, y, z);
+        parent.add(mesh);
+        return mesh;
+    }
+
+    // Chão
+    const floor = new THREE.Mesh(
+        new THREE.BoxGeometry(8, 0.12, 4),
+        material(0x332944)
+    );
+    floor.position.set(0, -0.08, 0);
+    scene.add(floor);
+
+    // Corpo
+    const body = new THREE.Group();
+    scene.add(body);
+
+    // Tronco
+    const torso = new THREE.Mesh(
+        new THREE.CapsuleGeometry(0.43, 0.78, 6, 12),
+        shirt
+    );
+    torso.position.set(0, 2.05, 0);
+    body.add(torso);
+
+    // Pescoço e cabeça
+    cylinder(body, 0.13, 0.13, 0.22, skin, 0, 2.76, 0);
+    sphere(body, 0, 3.08, 0, 0.29, 0.34, 0.27, skin);
+
+    // Cabelo
+    sphere(body, 0, 3.29, -0.015, 0.29, 0.15, 0.27,
+        material(0x29202b));
+
+    // Pernas fixas no chão
+    [-0.22, 0.22].forEach(function(x) {
+        const leg = cylinder(
+            body, 0.15, 0.19, 0.9, pants, x, 0.72, 0
+        );
+        leg.rotation.z = x < 0 ? -0.025 : 0.025;
+
+        cylinder(body, 0.12, 0.14, 0.38, pants, x, 0.25, 0);
+
+        const shoe = new THREE.Mesh(
+            new THREE.BoxGeometry(0.25, 0.12, 0.42),
+            shoeMat
+        );
+        shoe.position.set(x, 0.06, 0.08);
+        body.add(shoe);
+    });
+
+    // Braços articulados e halteres
+    const arms = [];
+
+    [-1, 1].forEach(function(side) {
+        const shoulder = new THREE.Group();
+        shoulder.position.set(side * 0.43, 2.43, 0);
+        body.add(shoulder);
+
+        sphere(shoulder, 0, 0, 0, 0.17, 0.17, 0.17, skin);
+
+        cylinder(
+            shoulder, 0.105, 0.13, 0.53,
+            skin, 0, -0.29, 0
+        );
+
+        const elbow = new THREE.Group();
+        elbow.position.set(0, -0.56, 0);
+        shoulder.add(elbow);
+
+        sphere(elbow, 0, 0, 0, 0.105, 0.105, 0.105, skin);
+
+        cylinder(
+            elbow, 0.075, 0.095, 0.48,
+            skin, 0, -0.24, 0
+        );
+
+        // Halter preso à mão
+        const dumbbell = new THREE.Group();
+        dumbbell.position.set(0, -0.52, 0);
+        elbow.add(dumbbell);
+
+        cylinder(
+            dumbbell, 0.035, 0.035, 0.25,
+            metal, 0, 0, 0
+        );
+
+        [-1, 1].forEach(function(s) {
+            const plate = cylinder(
+                dumbbell, 0.105, 0.105, 0.09,
+                weights, s * 0.14, 0, 0
+            );
+            plate.rotation.z = Math.PI / 2;
+        });
+
+        sphere(dumbbell, 0, 0, 0, 0.055, 0.055, 0.055, metal);
+
+        arms.push({
+            side: side,
+            shoulder: shoulder,
+            elbow: elbow,
+            start: 0,
+            target: 0
+        });
+    });
+
+    let totalReps = 0;
+    let raised = false;
+    let busy = false;
+    let animationStart = 0;
+    let animationFrom = 0;
+    let animationTo = 0;
+    let animationDuration = 350;
+
+    function setMessage(text) {
+        document.getElementById("message").textContent = text;
+    }
+
+    function updateStats() {
+        document.getElementById("reps").textContent =
+            totalReps + "/40";
+
+        document.getElementById("series").textContent =
+            totalReps >= 40 ? "4/4" :
+            (Math.floor(totalReps / 10) + 1) + "/4";
+
+        // Demonstração visual; não altera o saldo real da conta.
+        document.getElementById("bio").textContent =
+            (totalReps * 0.005).toFixed(3).replace(".", ",");
+
+        document.getElementById("bar").style.width =
+            (totalReps / 40 * 100) + "%";
+    }
+
+    function animateArms(from, to) {
+        if (busy) return;
+
+        busy = true;
+        animationFrom = from;
+        animationTo = to;
+        animationStart = performance.now();
+
+        arms.forEach(function(arm) {
+            arm.start = from;
+            arm.target = to;
+        });
+    }
+
+    document.getElementById("up").addEventListener("click", function() {
+        if (busy || raised || totalReps >= 40) return;
+
+        raised = true;
+        animateArms(0, 1);
+        setMessage("Subindo os halteres... 💪");
+    });
+
+    document.getElementById("down").addEventListener("click", function() {
+        if (busy || !raised || totalReps >= 40) return;
+
+        raised = false;
+        animateArms(1, 0);
+        setMessage("Descendo os halteres...");
+    });
+
+    document.getElementById("reset").addEventListener("click", function() {
+        totalReps = 0;
+        raised = false;
+        busy = false;
+        arms.forEach(function(arm) {
+            arm.elbow.rotation.z = 0;
+            arm.shoulder.rotation.z = 0;
+        });
+        updateStats();
+        setMessage("Treino reiniciado. Vamos começar!");
+    });
+
+    function render(now) {
+        requestAnimationFrame(render);
+
+        if (busy) {
+            const elapsed = now - animationStart;
+            const t = Math.min(elapsed / animationDuration, 1);
+            const smooth = t * t * (3 - 2 * t);
+            const value = animationFrom +
+                (animationTo - animationFrom) * smooth;
+
+            arms.forEach(function(arm) {
+                arm.elbow.rotation.z = -arm.side * value * 1.75;
+            });
+
+            if (t >= 1) {
+                busy = false;
+
+                if (!raised && animationTo === 0) {
+                    totalReps++;
+                    updateStats();
+
+                    if (totalReps >= 40) {
+                        setMessage("🏆 Parabéns! Você completou as 40 repetições!");
+                    } else if (totalReps % 10 === 0) {
+                        setMessage("Série concluída! Descanse e continue.");
+                    } else {
+                        setMessage("Repetição concluída! Suba os halteres novamente.");
+                    }
+                } else {
+                    setMessage("Agora toque em DESCER HALTERES para completar a repetição.");
+                }
+            }
+        }
+
+        renderer.render(scene, camera);
+    }
+
+    updateStats();
+    requestAnimationFrame(render);
+
+    window.addEventListener("resize", function() {
+        const w = sceneBox.clientWidth;
+        const h = sceneBox.clientHeight;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+    });
+})();
+</script>
+</body>
+</html>
+""", height=590, scrolling=False)
+
+
+
 
 
 # =========================================================
