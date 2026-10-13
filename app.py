@@ -1822,7 +1822,6 @@ def mostrar_roleta_biocore(participante):
             bip(880, 0.22);
             mensagem.textContent = '🎉 Giro concluído!';
           }, 4100);
-        }
         </script>
         """.replace("__INDICE__", indice_json),
         height=365,
