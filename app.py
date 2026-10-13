@@ -1576,6 +1576,8 @@ def criar_conta(
 # =========================================================
 
 def mostrar_login_cadastro():
+    st.subheader("Login / Cadastro")
+    st.info("A tela de login precisa ser restaurada.")
     
 
 
