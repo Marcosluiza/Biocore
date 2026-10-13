@@ -1733,7 +1733,7 @@ button:active { transform: scale(.97); }
         0.1,
         100
     );
-    camera.position.set(0, 2.1, 8.5);
+    camera.position.set(0, 1.8, 9);
     camera.lookAt(0, 1.65, 0);
 
     const renderer = new THREE.WebGLRenderer({
