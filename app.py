@@ -57,7 +57,7 @@ def inicializar_sessao():
         st.session_state.admin = False
 
 
-def sair(): it
+def sair(): 
     st.session_state.participante = None
     st.session_state.admin = False
     st.rerun()
