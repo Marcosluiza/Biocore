@@ -1735,7 +1735,8 @@ def mostrar_roleta_biocore(participante):
                         border-left:14px solid transparent;
                         border-right:14px solid transparent;
                         border-top:28px solid white"></div>
-            <div id="roda" style="width:100%;height:100%;border-radius:50%;
+            
+<div id="roda" style="width:100%;height:100%;border-radius:50%;
                  border:5px solid white;box-sizing:border-box;
                  background:conic-gradient(
                    #E84393 0deg 45deg,#8E44AD 45deg 90deg,
@@ -1743,7 +1744,9 @@ def mostrar_roleta_biocore(participante):
                    #F39C12 180deg 225deg,#E74C3C 225deg 270deg,
                    #6C5CE7 270deg 315deg,#55516B 315deg 360deg);
                  transition:transform 4s cubic-bezier(.12,.72,.12,1);
-                 position:relative"></div>
+                 position:relative">
+</div>
+
             <div style="position:absolute;inset:0;pointer-events:none">
               <div style="position:absolute;top:8%;left:40%;width:20%;
                           font-size:12px;font-weight:bold">1 BIO</div>
