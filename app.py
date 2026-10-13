@@ -1301,7 +1301,8 @@ def mostrar_participante():
         f"Olá, {participante['nome']}! 👋"
     )
 
-    
+        # ROLETA DA SORTE BIOCORE
+    mostrar_roleta_biocore(participante)
 
     bio = int(
         participante.get("bio", 0) or 0
