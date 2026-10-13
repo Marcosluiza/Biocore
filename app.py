@@ -1576,12 +1576,19 @@ def criar_conta(
 # =========================================================
 
 def mostrar_login_cadastro():
-    st.subheader("Login / Cadastro")
-    st.info("A tela de login precisa ser restaurada.")
+    st.header("Bem-vindo ao BioCore")
+
+    aba_login, aba_cadastro = st.tabs(
+        ["Entrar", "Criar cadastro"]
+    )
+
+    with aba_login:
+        login_participante()
+
+    with aba_cadastro:
+        cadastro_participante()
     
-
-
-          
+ 
 
 def mostrar_jogo_agachamento():
     import streamlit.components.v1 as components
