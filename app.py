@@ -1799,6 +1799,14 @@ button:active { transform: scale(.97); }
     const body = new THREE.Group();
     scene.add(body);
 
+    // TESTE VISUAL DO JOGO
+    const teste = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 1, 1),
+    new THREE.MeshBasicMaterial({ color: 0xff00ff })
+    );
+    teste.position.set(0, 1.5, 0);
+    scene.add(teste);
+
     // Tronco
     const torso = new THREE.Mesh(
         new THREE.CapsuleGeometry(0.43, 0.78, 6, 12),
