@@ -1809,6 +1809,7 @@ def mostrar_roleta_biocore(participante):
       fill: 'forwards'
     }
   );
+}
 
         
           let cliques = 0;
