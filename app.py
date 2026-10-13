@@ -1591,7 +1591,233 @@ def mostrar_login_cadastro():
  
 
 
-def mostrar_jogo_agachamento():
+
+def mostrar_roleta_biocore(participante):
+    import random
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    import streamlit.components.v1 as components
+
+    email = str(participante.get("email", "")).strip().lower()
+
+    if not email:
+        st.error("Não foi possível identificar sua conta.")
+        return
+
+    hoje = datetime.now(
+        ZoneInfo("America/Sao_Paulo")
+    ).date().isoformat()
+
+    dados = supabase_get("roleta_diaria", {
+        "select": "*",
+        "email": f"eq.{email}",
+        "data_giro": f"eq.{hoje}",
+        "limit": "1",
+    })
+
+    if dados is None:
+        st.error("Não foi possível consultar os giros.")
+        return
+
+    registro = dados[0] if dados else None
+    usados = int(registro.get("giros_usados", 0)) if registro else 0
+
+    st.subheader("🎡 Roleta da Sorte BioCore")
+    st.write("Gire a roleta e concorra a BIO!")
+    st.write(f"🎟️ Giros usados hoje: **{usados}/3**")
+
+    premios = [
+        ("1 BIO", 1),
+        ("2 BIO", 2),
+        ("5 BIO", 5),
+        ("10 BIO", 10),
+        ("25 BIO", 25),
+        ("50 BIO", 50),
+        ("100 BIO", 100),
+        ("Tente novamente", 0),
+    ]
+
+    probabilidades = [20, 20, 16, 15, 12, 10, 1, 6]
+
+    cores = [
+        "#E84393", "#8E44AD", "#3498DB", "#16A085",
+        "#F39C12", "#E74C3C", "#6C5CE7", "#55516B"
+    ]
+
+    if usados < 3:
+        if st.button("🎡 GIRAR A ROLETA", key="girar_roleta_biocore"):
+            premio_nome, premio_bio = random.choices(
+                premios,
+                weights=probabilidades,
+                k=1,
+            )[0]
+
+            bio_atual = int(participante.get("bio", 0) or 0)
+            novo_saldo = bio_atual + premio_bio
+
+            if registro:
+                resultado = supabase_update(
+                    "roleta_diaria",
+                    {
+                        "email": f"eq.{email}",
+                        "data_giro": f"eq.{hoje}",
+                    },
+                    {
+                        "giros_usados": usados + 1,
+                        "bio_ganho": int(registro.get("bio_ganho", 0) or 0) + premio_bio,
+                    },
+                )
+            else:
+                resultado = supabase_insert(
+                    "roleta_diaria",
+                    {
+                        "email": email,
+                        "data_giro": hoje,
+                        "giros_usados": 1,
+                        "bio_ganho": premio_bio,
+                    },
+                )
+
+            if resultado is None or resultado is False:
+                st.error("Não foi possível registrar o giro. Tente novamente.")
+                return
+
+            if premio_bio > 0:
+                saldo_salvo = supabase_update(
+                    "participantes",
+                    {"id": f"eq.{participante['id']}"},
+                    {"bio": novo_saldo},
+                )
+
+                if saldo_salvo is None or saldo_salvo is False:
+                    st.error(
+                        "O giro foi registrado, mas não conseguimos "
+                        "atualizar o saldo. Procure o administrador "
+                        "antes de tentar novamente."
+                    )
+                    return
+
+            st.session_state["resultado_roleta"] = {
+                "nome": premio_nome,
+                "bio": premio_bio,
+                "email": email,
+                "data": hoje,
+            }
+
+            st.rerun()
+
+    else:
+        st.info("Você já usou os 3 giros de hoje. Volte amanhã!")
+
+    resultado = st.session_state.get("resultado_roleta")
+
+    if resultado and resultado.get("email") == email and resultado.get("data") == hoje:
+        st.success(f"🎉 Resultado do giro: {resultado['nome']}!")
+
+    # Roleta visual com animação e som
+    import json
+
+    textos = [p[0] for p in premios]
+    cores_json = json.dumps(cores)
+    textos_json = json.dumps(textos)
+
+    resultado_indice = None
+    if resultado and resultado.get("email") == email and resultado.get("data") == hoje:
+        nome_resultado = resultado["nome"]
+        resultado_indice = textos.index(nome_resultado)
+
+    indice_json = json.dumps(resultado_indice)
+
+    components.html(
+        """
+        <div style="background:#17151f;color:white;padding:16px;
+                    border-radius:18px;text-align:center;font-family:Arial">
+          <div style="position:relative;width:280px;height:280px;
+                      max-width:85vw;margin:12px auto">
+            <div style="position:absolute;top:-5px;left:calc(50% - 14px);
+                        z-index:3;width:0;height:0;
+                        border-left:14px solid transparent;
+                        border-right:14px solid transparent;
+                        border-top:28px solid white"></div>
+            <div id="roda" style="width:100%;height:100%;border-radius:50%;
+                 border:5px solid white;box-sizing:border-box;
+                 background:conic-gradient(
+                   #E84393 0deg 45deg,#8E44AD 45deg 90deg,
+                   #3498DB 90deg 135deg,#16A085 135deg 180deg,
+                   #F39C12 180deg 225deg,#E74C3C 225deg 270deg,
+                   #6C5CE7 270deg 315deg,#55516B 315deg 360deg);
+                 transition:transform 4s cubic-bezier(.12,.72,.12,1);
+                 position:relative"></div>
+            <div style="position:absolute;inset:0;pointer-events:none">
+              <div style="position:absolute;top:8%;left:40%;width:20%;
+                          font-size:12px;font-weight:bold">1 BIO</div>
+              <div style="position:absolute;top:22%;right:3%;width:28%;
+                          font-size:12px;font-weight:bold">2 BIO</div>
+              <div style="position:absolute;top:43%;right:1%;width:28%;
+                          font-size:12px;font-weight:bold">5 BIO</div>
+              <div style="position:absolute;bottom:20%;right:4%;width:28%;
+                          font-size:12px;font-weight:bold">10 BIO</div>
+              <div style="position:absolute;bottom:7%;left:38%;width:26%;
+                          font-size:12px;font-weight:bold">25 BIO</div>
+              <div style="position:absolute;bottom:20%;left:2%;width:30%;
+                          font-size:12px;font-weight:bold">50 BIO</div>
+              <div style="position:absolute;top:43%;left:1%;width:28%;
+                          font-size:12px;font-weight:bold">100 BIO</div>
+              <div style="position:absolute;top:22%;left:1%;width:28%;
+                          font-size:10px;font-weight:bold">Tente de novo</div>
+            </div>
+          </div>
+          <p id="mensagem">Boa sorte! 🍀</p>
+          <button id="som" style="background:#E84393;color:white;
+             border:0;border-radius:10px;padding:10px 16px">
+             🔊 Ativar som
+          </button>
+        </div>
+        <script>
+        const indice = __INDICE__;
+        const roda = document.getElementById('roda');
+        const mensagem = document.getElementById('mensagem');
+        let audio = null;
+        let somAtivo = false;
+
+        document.getElementById('som').onclick = () => {
+          audio = new (window.AudioContext || window.webkitAudioContext)();
+          audio.resume();
+          somAtivo = true;
+          mensagem.textContent = 'Som ativado! 🔊';
+        };
+
+        function bip(freq, duracao) {
+          if (!somAtivo || !audio) return;
+          const o = audio.createOscillator();
+          const g = audio.createGain();
+          o.frequency.value = freq;
+          g.gain.value = 0.04;
+          o.connect(g);
+          g.connect(audio.destination);
+          o.start();
+          o.stop(audio.currentTime + duracao);
+        }
+
+        if (indice !== null) {
+          const angulo = 360 * 6 + (360 - (indice * 45 + 22.5));
+          roda.style.transform = 'rotate(' + angulo + 'deg)';
+          let cliques = 0;
+          const somGiro = setInterval(() => {
+            bip(500 + (cliques % 4) * 100, 0.035);
+            cliques++;
+          }, 180);
+          setTimeout(() => {
+            clearInterval(somGiro);
+            bip(880, 0.22);
+            mensagem.textContent = '🎉 Giro concluído!';
+          }, 4100);
+        }
+        </script>
+        """.replace("__INDICE__", indice_json),
+        height=365,
+    )
+    
     
     
     
