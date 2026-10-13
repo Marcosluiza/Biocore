@@ -57,7 +57,7 @@ def inicializar_sessao():
         st.session_state.admin = False
 
 
-def sair():
+def sair(): it
     st.session_state.participante = None
     st.session_state.admin = False
     st.rerun()
@@ -1796,8 +1796,19 @@ def mostrar_roleta_biocore(participante):
         }
 
         if (indice !== null) {
-          const angulo = 360 * 6 + (360 - (indice * 45 + 22.5));
-          roda.style.transform = 'rotate(' + angulo + 'deg)';
+        const angulo = 360 * 6 + (360 - (indice * 45 + 22.5));
+
+roda.animate(
+    [
+      { transform: 'rotate(0deg)' },
+      { transform: 'rotate(' + angulo + 'deg)' }
+    ],
+    {
+      duration: 4000,
+      easing: 'cubic-bezier(.12,.72,.12,1)',
+      fill: 'forwards'
+    }
+  );
           let cliques = 0;
           const somGiro = setInterval(() => {
             bip(500 + (cliques % 4) * 100, 0.035);
