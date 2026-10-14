@@ -1775,6 +1775,7 @@ def mostrar_roleta_biocore(participante):
         <script>
         const indice = __INDICE__;
         const roda = document.getElementById('roda');
+        const numeros = document.getElementById('numeros_roleta');
         const mensagem = document.getElementById('mensagem');
         let audio = null;
         let somAtivo = false;
