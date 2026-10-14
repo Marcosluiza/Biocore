@@ -1747,7 +1747,7 @@ def mostrar_roleta_biocore(participante):
                  position:relative">
 </div>
 
-            <div style="position:absolute;inset:0;pointer-events:none">
+            <div id="numeros_roleta" style="position:absolute;inset:0;pointer-events:none">
               <div style="position:absolute;top:8%;left:40%;width:20%;
                           font-size:12px;font-weight:bold">1 BIO</div>
               <div style="position:absolute;top:22%;right:3%;width:28%;
