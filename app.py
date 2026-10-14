@@ -1757,7 +1757,7 @@ def mostrar_roleta_biocore(participante):
            <div id="numeros_roleta" style="position:absolute;inset:0;pointer-events:none;color:white;font-weight:bold;text-align:center;">
               <div style="position:absolute;top:18%;left:33%;width:16%;font-size:12px;">1 BIO</div>
               <div style="position:absolute;top:18%;right:28%;width:25%;font-size:12px;">2 BIO</div>
-              <div style="position:absolute;top:33%;right:14%;width:25%;font-size:12px;">5 BIO</div>
+              <div style="position:absolute;top:28%;right:14%;width:25%;font-size:12px;">5 BIO</div>
               <div style="position:absolute;top:62%;right:18%;width:25%;font-size:12px;">10 BIO</div>
               <div style="position:absolute;bottom:10%;left:39%;width:25%;font-size:12px;">25 BIO</div>
               <div style="position:absolute;bottom:10%;left:8%;width:25%;font-size:12px;">50 BIO</div>
