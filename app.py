@@ -1802,18 +1802,24 @@ def mostrar_roleta_biocore(participante):
         if (indice !== null) {
   const angulo = 360 * 6 + (360 - (indice * 45 + 22.5));
 
-  roda.animate(
-    [
-      { transform: 'rotate(0deg)' },
-      { transform: 'rotate(' + angulo + 'deg)' }
-    ],
-    {
-      duration: 4000,
-      easing: 'cubic-bezier(.12,.72,.12,1)',
-      fill: 'forwards'
-    }
-  );
+  const quadros = [
+    { transform: 'rotate(0deg)' },
+    { transform: 'rotate(' + angulo + 'deg)' }
+  ];
+
+  const configuracao = {
+    duration: 4000,
+    easing: 'cubic-bezier(.12,.72,.12,1)',
+    fill: 'forwards'
+  };
+
+  roda.style.transform = '';
+  numeros.style.transform = '';
+
+  roda.animate(quadros, configuracao);
+  numeros.animate(quadros, configuracao);
 }
+
 
         
           let cliques = 0;
