@@ -1746,26 +1746,25 @@ def mostrar_roleta_biocore(participante):
                  transition:transform 4s cubic-bezier(.12,.72,.12,1);
                  position:relative">
 </div>
+            
+            
+            </div>
 
-            <div id="numeros_roleta" style="position:absolute;inset:0;pointer-events:none">
-              <div style="position:absolute;top:8%;left:40%;width:20%;
-                          font-size:12px;font-weight:bold">1 BIO</div>
-              <div style="position:absolute;top:22%;right:3%;width:28%;
-                          font-size:12px;font-weight:bold">2 BIO</div>
-              <div style="position:absolute;top:43%;right:1%;width:28%;
-                          font-size:12px;font-weight:bold">5 BIO</div>
-              <div style="position:absolute;bottom:20%;right:4%;width:28%;
-                          font-size:12px;font-weight:bold">10 BIO</div>
-              <div style="position:absolute;bottom:7%;left:38%;width:26%;
-                          font-size:12px;font-weight:bold">25 BIO</div>
-              <div style="position:absolute;bottom:20%;left:2%;width:30%;
-                          font-size:12px;font-weight:bold">50 BIO</div>
-              <div style="position:absolute;top:43%;left:1%;width:28%;
-                          font-size:12px;font-weight:bold">100 BIO</div>
-              <div style="position:absolute;top:22%;left:1%;width:28%;
-                          font-size:10px;font-weight:bold">Tente de novo</div>
+            
+            <div id="numeros_roleta" style="position:absolute;inset:0;pointer-events:none;color:white;font-weight:bold;text-align:center;">
+            <div style="position:absolute;top:13%;left:42%;width:16%;font-size:12px;">1 BIO</div>
+            <div style="position:absolute;top:29%;right:8%;width:25%;font-size:12px;">2 BIO</div>
+            <div style="position:absolute;top:46%;right:4%;width:25%;font-size:12px;">5 BIO</div>
+            <div style="position:absolute;bottom:25%;right:8%;width:25%;font-size:12px;">10 BIO</div>
+            <div style="position:absolute;bottom:12%;left:39%;width:25%;font-size:12px;">25 BIO</div>
+            <div style="position:absolute;bottom:25%;left:5%;width:25%;font-size:12px;">50 BIO</div>
+            <div style="position:absolute;top:46%;left:4%;width:25%;font-size:12px;">100 BIO</div>
+            <div style="position:absolute;top:29%;left:5%;width:28%;font-size:10px;">Tente de novo</div>
+            </div>
+
             </div>
           </div>
+          
           <p id="mensagem">Boa sorte! 🍀</p>
           <button id="som" style="background:#E84393;color:white;
              border:0;border-radius:10px;padding:10px 16px">
