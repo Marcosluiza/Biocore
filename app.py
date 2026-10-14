@@ -1753,18 +1753,18 @@ def mostrar_roleta_biocore(participante):
             </div>
 
             
-<div id="numeros_roleta" style="position:absolute;inset:0;pointer-events:none;color:white;font-weight:bold;text-align:center;">
-  <div style="position:absolute;top:13%;left:42%;width:16%;font-size:12px;">1 BIO</div>
-  <div style="position:absolute;top:29%;right:8%;width:25%;font-size:12px;">2 BIO</div>
-  <div style="position:absolute;top:46%;right:4%;width:25%;font-size:12px;">5 BIO</div>
-  <div style="position:absolute;bottom:25%;right:8%;width:25%;font-size:12px;">10 BIO</div>
-  <div style="position:absolute;bottom:12%;left:39%;width:25%;font-size:12px;">25 BIO</div>
-  <div style="position:absolute;bottom:25%;left:5%;width:25%;font-size:12px;">50 BIO</div>
-  <div style="position:absolute;top:46%;left:4%;width:25%;font-size:12px;">100 BIO</div>
-  <div style="position:absolute;top:29%;left:5%;width:28%;font-size:10px;">Tente de novo</div>
-</div>
-
+            
+           <div id="numeros_roleta" style="position:absolute;inset:0;pointer-events:none;color:white;font-weight:bold;text-align:center;">
+              <div style="position:absolute;top:18%;left:42%;width:16%;font-size:12px;">1 BIO</div>
+              <div style="position:absolute;top:27%;right:12%;width:25%;font-size:12px;">2 BIO</div>
+              <div style="position:absolute;top:43%;right:8%;width:25%;font-size:12px;">5 BIO</div>
+              <div style="position:absolute;top:62%;right:8%;width:25%;font-size:12px;">10 BIO</div>
+              <div style="position:absolute;bottom:10%;left:39%;width:25%;font-size:12px;">25 BIO</div>
+              <div style="position:absolute;bottom:10%;left:8%;width:25%;font-size:12px;">50 BIO</div>
+              <div style="position:absolute;top:62%;left:7%;width:25%;font-size:12px;">100 BIO</div>
+           <div style="position:absolute;top:40%;left:3%;width:30%;font-size:10px;">Tente de novo</div>
             </div>
+
           </div>
           
           <p id="mensagem">Boa sorte! 🍀</p>
