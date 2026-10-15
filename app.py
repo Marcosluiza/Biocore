@@ -1640,15 +1640,14 @@ def mostrar_roleta_biocore(participante):
     registro = dados[0] if dados else None
     usados = int(registro.get("giros_usados", 0)) if registro else 0
 
-    st.subheader("🎡 Roleta da Sorte BioCore")
-    st.subheader("🎡 Roleta da Sorte BioCore")
-
-    st.warning(
-        "🛠️ JOGO TEMPORARIAMENTE EM MANUTENÇÃO\n\n"
-        "Estamos trabalhando para melhorar sua experiência!\n\n"
-        "A roleta estará disponível novamente em breve. "
-        "Enquanto isso, você pode continuar aproveitando "
-        "as outras funcionalidades do BioCore."
+    with st.expander("🎡 Roleta Biocoins"):
+        st.warning(
+            "🛠️ JOGO TEMPORARIAMENTE EM MANUTENÇÃO\n\n"
+            "Estamos trabalhando para melhorar sua experiência!\n\n"
+            "A roleta estará disponível novamente em breve. "
+            "Enquanto isso, você pode continuar aproveitando "
+            "as outras funcionalidades do BioCore."
+        )
     )
     return
     st.write("Gire a roleta e concorra a BIO!")
