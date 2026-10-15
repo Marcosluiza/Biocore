@@ -17,7 +17,29 @@ st.set_page_config(
     page_icon="💪",
     layout="centered",
 )
+st.markdown("""
+<style>
+#MainMenu {
+    display: none !important;
+}
 
+footer {
+    display: none !important;
+}
+
+[data-testid="stToolbar"] {
+    display: none !important;
+}
+
+[data-testid="stDecoration"] {
+    display: none !important;
+}
+
+[data-testid="stAppDeployButton"] {
+    display: none !important;
+}
+</style>
+""", unsafe_allow_html=True)
 SUPABASE_URL = st.secrets["SUPABASE_URL"].rstrip("/")
 SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
 
