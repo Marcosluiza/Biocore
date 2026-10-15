@@ -1648,7 +1648,7 @@ def mostrar_roleta_biocore(participante):
             "Enquanto isso, você pode continuar aproveitando "
             "as outras funcionalidades do BioCore."
         )
-    )
+        
     return
     st.write("Gire a roleta e concorra a BIO!")
     st.write(f"🎟️ Giros usados hoje: **{usados}/3**")
