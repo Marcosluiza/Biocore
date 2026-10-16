@@ -851,18 +851,19 @@ def registrar_treino(participante_id):
     inicio = inicio_dia_utc()
     fim = inicio_proximo_dia_utc()
 
+    
     treinos_hoje = supabase_get(
         "treinos",
         {
-            "select": "id",
-            "participante_id":
-            f"eq.{participante_id}",
-            "created_at":
-            f"gte.{inicio}",
-            "and":
-            f"(created_at.lt.{fim})",
+            "select": "id,created_at",
+            "participante_id": f"eq.{participante_id}",
+            "created_at": f"gte.{inicio}",
+            "and": f"(created_at.lt.{fim})",
         },
     )
+
+    st.write("Registros encontrados:", treinos_hoje)
+
 
     if treinos_hoje:
         st.info(
