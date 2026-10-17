@@ -840,6 +840,7 @@ def mostrar_termos():
 # =========================================================
 
 
+
 def registrar_treino(participante_id):
     st.subheader("🏋️ Registrar atividade")
 
@@ -857,6 +858,7 @@ def registrar_treino(participante_id):
             "participante_id": f"eq.{participante_id}",
             "created_at": f"gte.{inicio}",
             "and": f"(created_at.lt.{fim})",
+            "limit": "1",
         },
     )
 
@@ -887,6 +889,7 @@ def registrar_treino(participante_id):
                 "Treino registrado. Aguarde a aprovação."
             )
             st.rerun()
+
 
 
 # =========================================================
