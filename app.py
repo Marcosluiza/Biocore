@@ -241,18 +241,16 @@ def inicio_dia_brasil():
     )
 
 
+
 def inicio_dia_utc():
-    return inicio_dia_brasil().astimezone(
-        timezone.utc
-    ).isoformat()
+    inicio = inicio_dia_brasil()
+    return inicio.astimezone(timezone.utc).isoformat()
 
 
 def inicio_proximo_dia_utc():
-    proximo = inicio_dia_brasil() + timedelta(days=1)
+    inicio = inicio_dia_brasil() + timedelta(days=1)
+    return inicio.astimezone(timezone.utc).isoformat()
 
-    return proximo.astimezone(
-        timezone.utc
-    ).isoformat()
 
 
 # =========================================================
