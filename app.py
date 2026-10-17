@@ -841,44 +841,132 @@ def mostrar_termos():
 
 
 
+
 def registrar_treino(participante_id):
     st.subheader("🏋️ Registrar atividade")
-
-    st.caption(
-        "Limite: 1 atividade registrada por dia."
-    )
+    st.caption("Limite: 1 atividade registrada por dia.")
 
     inicio = inicio_dia_utc()
     fim = inicio_proximo_dia_utc()
 
-    treinos_hoje = supabase_get(
+    # Busca registros do participante a partir do início
+    # do dia no horário de Brasília.
+    treinos = supabase_get(
         "treinos",
         {
-            "select": "id,created_at",
+            "select": "id,created_at,atividade,status",
             "participante_id": f"eq.{participante_id}",
             "created_at": f"gte.{inicio}",
-            "and": f"(created_at.lt.{fim})",
-            "limit": "1",
+            "order": "created_at.desc",
         },
     )
 
-    if treinos_hoje:
-        st.info(
-            "Já existe um registro para hoje."
-        )
-        st.write("Confira o registro:", treinos_hoje)
-        st.caption(
-            "Se a data estiver errada, precisamos corrigir o filtro."
-        )
+    if treinos is None:
+        st.error("Não foi possível verificar seus treinos.")
         return
 
+    # Confere o intervalo completo em Python para evitar
+    # depender do filtro 'and' do PostgREST.
+    inicio_dt = datetime.fromisoformat(inicio)
+    fim_dt = datetime.fromisoformat(fim)
+
+    treinos_hoje = []
+
+    for treino in treinos:
+        data_texto = treino.get("created_at")
+
+        if not data_texto:
+            continue
+
+        try:
+            data_treino = datetime.fromisoformat(
+                data_texto.replace("Z", "+00:00")
+            )
+
+            if data_treino.tzinfo is None:
+                data_treino = data_treino.replace(
+                    tzinfo=timezone.utc
+                )
+
+            data_treino = data_treino.astimezone(timezone.utc)
+
+            if inicio_dt <= data_treino < fim_dt:
+                treinos_hoje.append(treino)
+
+        except (ValueError, TypeError):
+            continue
+
+    if treinos_hoje:
+        st.info("Você já registrou uma atividade hoje.")
+
+        ultimo = treinos_hoje[0]
+        st.write(f"Atividade: {ultimo.get('atividade', 'Não informada')}")
+        st.write(f"Status: {ultimo.get('status', 'Pendente')}")
+        st.caption(f"Registro: {ultimo.get('created_at', '')}")
+        return
 
     atividade = st.selectbox(
         "Escolha a atividade",
         ATIVIDADES,
+        key=f"atividade_{participante_id}",
     )
 
-    if st.button("Registrar treino"):
+    if st.button(
+        "Registrar treino",
+        key=f"registrar_treino_{participante_id}",
+    ):
+        # Nova verificação antes de gravar.
+        verificacao = supabase_get(
+            "treinos",
+            {
+                "select": "id,created_at",
+                "participante_id": f"eq.{participante_id}",
+                "created_at": f"gte.{inicio}",
+                "order": "created_at.desc",
+            },
+        )
+
+        if verificacao is None:
+            st.error(
+                "Não foi possível confirmar se você já registrou "
+                "uma atividade. Tente novamente."
+            )
+            return
+
+        existe = False
+
+        for item in verificacao:
+            data_texto = item.get("created_at")
+
+            if not data_texto:
+                continue
+
+            try:
+                data_item = datetime.fromisoformat(
+                    data_texto.replace("Z", "+00:00")
+                )
+
+                if data_item.tzinfo is None:
+                    data_item = data_item.replace(
+                        tzinfo=timezone.utc
+                    )
+
+                data_item = data_item.astimezone(timezone.utc)
+
+                if inicio_dt <= data_item < fim_dt:
+                    existe = True
+                    break
+
+            except (ValueError, TypeError):
+                continue
+
+        if existe:
+            st.warning(
+                "Já existe um registro de atividade para hoje."
+            )
+            st.rerun()
+            return
+
         resultado = supabase_insert(
             "treinos",
             {
@@ -891,9 +979,16 @@ def registrar_treino(participante_id):
 
         if resultado:
             st.success(
-                "Treino registrado. Aguarde a aprovação."
+                "Treino registrado com sucesso! "
+                "Aguarde a aprovação do administrador."
             )
             st.rerun()
+        else:
+            st.error(
+                "Não foi possível registrar o treino. "
+                "Verifique a conexão e tente novamente."
+            )
+
 
 
 
