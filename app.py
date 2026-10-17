@@ -864,9 +864,14 @@ def registrar_treino(participante_id):
 
     if treinos_hoje:
         st.info(
-            "Você já registrou uma atividade hoje."
+            "Já existe um registro para hoje."
+        )
+        st.write("Confira o registro:", treinos_hoje)
+        st.caption(
+            "Se a data estiver errada, precisamos corrigir o filtro."
         )
         return
+
 
     atividade = st.selectbox(
         "Escolha a atividade",
