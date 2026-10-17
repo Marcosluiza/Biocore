@@ -839,6 +839,7 @@ def mostrar_termos():
 # PARTICIPANTE — TREINO
 # =========================================================
 
+
 def registrar_treino(participante_id):
     st.subheader("🏋️ Registrar atividade")
 
@@ -849,7 +850,6 @@ def registrar_treino(participante_id):
     inicio = inicio_dia_utc()
     fim = inicio_proximo_dia_utc()
 
-    
     treinos_hoje = supabase_get(
         "treinos",
         {
@@ -859,9 +859,6 @@ def registrar_treino(participante_id):
             "and": f"(created_at.lt.{fim})",
         },
     )
-
-    st.write("Registros encontrados:", treinos_hoje)
-
 
     if treinos_hoje:
         st.info(
@@ -874,20 +871,14 @@ def registrar_treino(participante_id):
         ATIVIDADES,
     )
 
-    if st.button(
-        "Registrar treino"
-    ):
+    if st.button("Registrar treino"):
         resultado = supabase_insert(
             "treinos",
             {
-                "participante_id":
-                participante_id,
-                "atividade":
-                atividade,
-                "status":
-                "Pendente",
-                "bio_pago":
-                False,
+                "participante_id": participante_id,
+                "atividade": atividade,
+                "status": "Pendente",
+                "bio_pago": False,
             },
         )
 
