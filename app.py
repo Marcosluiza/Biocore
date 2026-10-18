@@ -844,13 +844,11 @@ def mostrar_termos():
 
 def registrar_treino(participante_id):
     st.subheader("🏋️ Registrar atividade")
-    st.caption("Limite: 1 atividade registrada por dia.")
+    st.caption("Limite: 1 treino por dia.")
 
     inicio = inicio_dia_utc()
     fim = inicio_proximo_dia_utc()
 
-    # Busca registros do participante a partir do início
-    # do dia no horário de Brasília.
     treinos = supabase_get(
         "treinos",
         {
@@ -862,47 +860,42 @@ def registrar_treino(participante_id):
     )
 
     if treinos is None:
-        st.error("Não foi possível verificar seus treinos.")
+        st.error("Erro ao verificar seus registros.")
         return
 
-    # Confere o intervalo completo em Python para evitar
-    # depender do filtro 'and' do PostgREST.
+    # Verifica se existe treino hoje no horário de Brasília.
     inicio_dt = datetime.fromisoformat(inicio)
     fim_dt = datetime.fromisoformat(fim)
 
     treinos_hoje = []
 
     for treino in treinos:
-        data_texto = treino.get("created_at")
+        data = treino.get("created_at")
 
-        if not data_texto:
+        if not data:
             continue
 
         try:
-            data_treino = datetime.fromisoformat(
-                data_texto.replace("Z", "+00:00")
+            data_dt = datetime.fromisoformat(
+                data.replace("Z", "+00:00")
             )
 
-            if data_treino.tzinfo is None:
-                data_treino = data_treino.replace(
-                    tzinfo=timezone.utc
-                )
+            if data_dt.tzinfo is None:
+                data_dt = data_dt.replace(tzinfo=timezone.utc)
 
-            data_treino = data_treino.astimezone(timezone.utc)
+            data_dt = data_dt.astimezone(timezone.utc)
 
-            if inicio_dt <= data_treino < fim_dt:
+            if inicio_dt <= data_dt < fim_dt:
                 treinos_hoje.append(treino)
 
         except (ValueError, TypeError):
             continue
 
     if treinos_hoje:
-        st.info("Você já registrou uma atividade hoje.")
-
-        ultimo = treinos_hoje[0]
-        st.write(f"Atividade: {ultimo.get('atividade', 'Não informada')}")
-        st.write(f"Status: {ultimo.get('status', 'Pendente')}")
-        st.caption(f"Registro: {ultimo.get('created_at', '')}")
+        treino = treinos_hoje[0]
+        st.success("✅ Você já registrou seu treino de hoje.")
+        st.write(f"**Atividade:** {treino.get('atividade', '')}")
+        st.write(f"**Status:** {treino.get('status', 'Pendente')}")
         return
 
     atividade = st.selectbox(
@@ -912,10 +905,11 @@ def registrar_treino(participante_id):
     )
 
     if st.button(
-        "Registrar treino",
+        "🏋️ REGISTRAR TREINO",
         key=f"registrar_treino_{participante_id}",
+        use_container_width=True,
     ):
-        # Nova verificação antes de gravar.
+        # Confere novamente antes de salvar.
         verificacao = supabase_get(
             "treinos",
             {
@@ -927,43 +921,36 @@ def registrar_treino(participante_id):
         )
 
         if verificacao is None:
-            st.error(
-                "Não foi possível confirmar se você já registrou "
-                "uma atividade. Tente novamente."
-            )
+            st.error("Não foi possível verificar o registro.")
             return
 
-        existe = False
+        ja_registrou = False
 
         for item in verificacao:
-            data_texto = item.get("created_at")
+            data = item.get("created_at")
 
-            if not data_texto:
+            if not data:
                 continue
 
             try:
-                data_item = datetime.fromisoformat(
-                    data_texto.replace("Z", "+00:00")
+                data_dt = datetime.fromisoformat(
+                    data.replace("Z", "+00:00")
                 )
 
-                if data_item.tzinfo is None:
-                    data_item = data_item.replace(
-                        tzinfo=timezone.utc
-                    )
+                if data_dt.tzinfo is None:
+                    data_dt = data_dt.replace(tzinfo=timezone.utc)
 
-                data_item = data_item.astimezone(timezone.utc)
+                data_dt = data_dt.astimezone(timezone.utc)
 
-                if inicio_dt <= data_item < fim_dt:
-                    existe = True
+                if inicio_dt <= data_dt < fim_dt:
+                    ja_registrou = True
                     break
 
             except (ValueError, TypeError):
                 continue
 
-        if existe:
-            st.warning(
-                "Já existe um registro de atividade para hoje."
-            )
+        if ja_registrou:
+            st.warning("Você já registrou um treino hoje.")
             st.rerun()
             return
 
@@ -978,16 +965,12 @@ def registrar_treino(participante_id):
         )
 
         if resultado:
-            st.success(
-                "Treino registrado com sucesso! "
-                "Aguarde a aprovação do administrador."
-            )
+            st.success("✅ Treino registrado! Aguarde a aprovação.")
             st.rerun()
         else:
-            st.error(
-                "Não foi possível registrar o treino. "
-                "Verifique a conexão e tente novamente."
-            )
+            st.error("Falha ao registrar. Tente novamente.")
+
+
 
 
 
