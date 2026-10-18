@@ -893,15 +893,12 @@ def registrar_treino(participante_id):
 
     
     if treinos_hoje:
-        st.warning("Registro encontrado pelo sistema:")
-
-        for treino in treinos_hoje:
-            st.write(f"ID: {treino.get('id')}")
-            st.write(f"Data: {treino.get('created_at')}")
-            st.write(f"Atividade: {treino.get('atividade')}")
-            st.write(f"Status: {treino.get('status')}")
-
-        return
+    st.warning(
+        "💪 Treino já registrado! "
+        "Você já registrou sua atividade de hoje. "
+        "Continue firme na sua evolução!"
+    )
+    return
 
 
     atividade = st.selectbox(
