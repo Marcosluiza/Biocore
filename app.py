@@ -893,7 +893,7 @@ def registrar_treino(participante_id):
 
     
     if treinos_hoje:
-    st.warning(
+        st.warning(
         "💪 Treino já registrado! "
         "Você já registrou sua atividade de hoje. "
         "Continue firme na sua evolução!"
