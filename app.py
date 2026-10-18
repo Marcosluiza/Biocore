@@ -891,12 +891,22 @@ def registrar_treino(participante_id):
         except (ValueError, TypeError):
             continue
 
+    
     if treinos_hoje:
-        treino = treinos_hoje[0]
-        st.success("✅ Você já registrou seu treino de hoje.")
-        st.write(f"**Atividade:** {treino.get('atividade', '')}")
-        st.write(f"**Status:** {treino.get('status', 'Pendente')}")
+        st.warning("Registro encontrado pelo sistema:")
+
+        for treino in treinos_hoje:
+            st.write(f"ID: {treino.get('id')}")
+            st.write(f"Data: {treino.get('created_at')}")
+            st.write(f"Atividade: {treino.get('atividade')}")
+            st.write(f"Status: {treino.get('status')}")
+
+        st.info(
+            "Confira a data e o ID para identificarmos "
+            "por que o botão está bloqueado."
+        )
         return
+
 
     atividade = st.selectbox(
         "Escolha a atividade",
