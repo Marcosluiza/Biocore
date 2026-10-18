@@ -901,10 +901,6 @@ def registrar_treino(participante_id):
             st.write(f"Atividade: {treino.get('atividade')}")
             st.write(f"Status: {treino.get('status')}")
 
-        st.info(
-            "Confira a data e o ID para identificarmos "
-            "por que o botão está bloqueado."
-        )
         return
 
 
