@@ -898,7 +898,7 @@ def registrar_treino(participante_id):
         "Você já registrou sua atividade de hoje. "
         "Continue firme na sua evolução!"
     )
-    return
+        return
 
 
     atividade = st.selectbox(
