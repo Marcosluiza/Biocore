@@ -1363,6 +1363,15 @@ def mostrar_links():
     st.caption(
         "CoreStryke é a loja do BioCore."
     )
+    st.link_button(
+        "🎵 Produtos e Ofertas no TikTok",
+        "https://www.tiktok.com/@marcosbiocore",
+        use_container_width=True
+    )
+
+    st.caption(
+        "Encontre produtos recomendados pelo BioCore."
+    )
 
     st.link_button(
         "👛 Trust Wallet",
