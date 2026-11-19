@@ -1368,6 +1368,16 @@ def mostrar_links():
         "https://www.tiktok.com/@marcosbiocore",
         use_container_width=True
     )
+    
+    st.markdown("### 🤝 Parceiros BioCore")
+st.caption("Utilize suas BIOCoins na clínica Corpo e Mente.")
+
+st.link_button(
+    
+    "💰 Usar BIOCoins — Corpo e Mente",
+    "https://www.instagram.com/kris_kaetite?dmpr=ODE2dHlwaXZ0aTdt",
+    use_container_width=True
+)
 
     st.caption(
         "Encontre produtos recomendados pelo BioCore."
