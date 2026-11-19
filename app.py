@@ -1370,9 +1370,9 @@ def mostrar_links():
     )
     
     st.markdown("### 🤝 Parceiros BioCore")
-st.caption("Utilize suas BIOCoins na clínica Corpo e Mente.")
+    st.caption("Utilize suas BIOCoins na clínica Corpo e Mente.")
 
-st.link_button(
+    st.link_button(
     
     "💰 Usar BIOCoins — Corpo e Mente",
     "https://www.instagram.com/kris_kaetite?dmpr=ODE2dHlwaXZ0aTdt",
